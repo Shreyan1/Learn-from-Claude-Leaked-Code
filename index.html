@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn from Claude Leaked Code</title>
+  <meta name="description" content="The leaked Claude Code source, explained. Learn how Anthropic built an AI coding CLI: architecture, tools, security, and patterns worth stealing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Top Header -->
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">CC</div>
+      <span class="logo-text">Learn from Claude <span>Leaked Code</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+      <button class="btn-icon hamburger" id="hamburger" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle dark mode">
+        <span id="theme-icon">
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" style="display:none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="active"><span class="nav-icon"><i data-lucide="book-open"></i></span> Introduction</a>
+        <a href="architecture.html"><span class="nav-icon"><i data-lucide="layers"></i></span> Architecture</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Systems</div>
+      <nav class="sidebar-nav">
+        <a href="query-engine.html"><span class="nav-icon"><i data-lucide="zap"></i></span> Query Engine</a>
+        <a href="tools.html"><span class="nav-icon"><i data-lucide="wrench"></i></span> Tools System</a>
+        <a href="security.html"><span class="nav-icon"><i data-lucide="shield"></i></span> Security &amp; Permissions</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Advanced</div>
+      <nav class="sidebar-nav">
+        <a href="best-practices.html"><span class="nav-icon"><i data-lucide="star"></i></span> Best Practices</a>
+        <a href="mcp-skills.html"><span class="nav-icon"><i data-lucide="plug"></i></span> MCP &amp; Skills</a>
+        <a href="interpret.html"><span class="nav-icon"><i data-lucide="compass"></i></span> Navigate the Source</a>
+      </nav>
+    </div>
+    <div class="sidebar-download">
+      <a href="https://github.com/Shreyan1/claude-code-src-leaked" target="_blank" rel="noopener" class="download-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.66-.17.61-.19 1.25-.05 1.87L9 22"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        View Full Leaked Code
+      </a>
+      <p class="download-note">On GitHub &middot; Shreyan1/claude-code-src-leaked</p>
+      <a href="https://www.linkedin.com/in/shreyanbasuray/" target="_blank" rel="noopener" class="linkedin-follow-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Follow on LinkedIn
+      </a>
+    </div>
+  </aside>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Main Content -->
+  <div class="content-wrapper">
+    <main class="page-content">
+
+      <div class="breadcrumb">
+        <span>Learn from Claude Leaked Code</span>
+        <span class="sep">/</span>
+        <span>Introduction</span>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-badge">Source Documentation</div>
+        <h1>Claude Code</h1>
+        <p>Anthropic ships Claude Code as a compiled CLI. No one was supposed to see the source. This site walks you through exactly how it is built so you can learn from one of the most sophisticated AI coding agents ever written.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">1,903</div>
+          <div class="stat-label">Source Files</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">332+</div>
+          <div class="stat-label">Modules</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">80+</div>
+          <div class="stat-label">Slash Commands</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">46+</div>
+          <div class="stat-label">Built-in Tools</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">147</div>
+          <div class="stat-label">UI Components</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">88</div>
+          <div class="stat-label">Custom Hooks</div>
+        </div>
+      </div>
+
+      <div class="download-card">
+        <div class="download-card-left">
+          <div class="download-card-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            View the Source Code
+          </div>
+          <p>Get the full Claude Code source from the GitHub repository. Browse it locally in your editor while you read through this guide since having the code on hand makes everything click faster.</p>
+        </div>
+        <a href="https://github.com/Shreyan1/claude-code-src-leaked" target="_blank" rel="noopener" class="download-btn-large">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.66-.17.61-.19 1.25-.05 1.87L9 22"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+          View Full Leaked Code on GitHub
+        </a>
+      </div>
+
+      <h2 id="key-features">Key Features</h2>
+
+      <p>Claude Code isn't a wrapper around an LLM. It's a fully realized AI development environment. Here's what ships in the source:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Agentic Coding</strong></td><td>Claude autonomously edits files, runs tests, and fixes bugs across multi-step tasks without hand-holding</td></tr>
+            <tr><td><strong>46+ Tools</strong></td><td>Bash, file read/write/edit, web search/fetch, glob, grep, LSP, agents, MCP, and notebook editing</td></tr>
+            <tr><td><strong>80+ Commands</strong></td><td><code>/commit</code>, <code>/review</code>, <code>/diff</code>, <code>/mcp</code>, <code>/skills</code>, <code>/session</code>, <code>/autofix-pr</code>, <code>/bughunter</code>, and more</td></tr>
+            <tr><td><strong>Plan Mode</strong></td><td>Claude drafts a full plan for approval before executing any changes — <code>EnterPlanModeTool</code></td></tr>
+            <tr><td><strong>Multi-Agent</strong></td><td>Spawns and orchestrates sub-agents (<code>AgentTool</code>) for parallel workloads, each with their own tool context</td></tr>
+            <tr><td><strong>Remote Bridge</strong></td><td>Connects CLI to remote execution environments over WebSocket via the <code>bridge/</code> system</td></tr>
+            <tr><td><strong>Skills System</strong></td><td>Define custom slash commands in JavaScript; 19 bundled skills ship with the product</td></tr>
+            <tr><td><strong>MCP Protocol</strong></td><td>First-class support for Model Context Protocol servers — external tools appear as native tools</td></tr>
+            <tr><td><strong>Vim Mode</strong></td><td>Full vi-keybinding support in the terminal REPL (<code>vim/</code>)</td></tr>
+            <tr><td><strong>Voice Mode</strong></td><td>Feature-gated voice input/output support (<code>voice/</code>)</td></tr>
+            <tr><td><strong>IDE Integration</strong></td><td>Bidirectional sync with VS Code and JetBrains via LSP (<code>server/</code>, <code>hooks/useIDEIntegration.tsx</code>)</td></tr>
+            <tr><td><strong>Git Worktrees</strong></td><td>Git worktree isolation for parallel agent tasks — each agent works in its own branch</td></tr>
+            <tr><td><strong>Cron Triggers</strong></td><td>Schedule AI agents to run on intervals via <code>ScheduleCronTool</code> (<code>AGENT_TRIGGERS</code> flag)</td></tr>
+            <tr><td><strong>Cost Tracking</strong></td><td>Per-session token and dollar cost tracking with model pricing via <code>cost-tracker.ts</code></td></tr>
+            <tr><td><strong>Compaction</strong></td><td>Automatic context window management for long sessions: AutoCompact, Microcompact, Snip strategies</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="what-is-claude-code">What is Claude Code?</h2>
+
+      <p>Think of Claude Code less as a chatbot and more as a coworker who can actually touch your filesystem. It reads files, runs shell commands, browses the web, edits code, makes git commits, and orchestrates other AI agents directly from a single terminal session. The codebase behind it is a TypeScript monolith (~12,000 lines across 332+ modules) that runs on Bun and renders its UI using React. In a terminal. With hooks. Yes, really.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon"><i data-lucide="triangle-alert"></i></span>
+        <div class="callout-body">
+          <p>This is not an official Anthropic release. This documentation was generated by analyzing the distributed source. Code examples are illustrative of real patterns in the codebase.</p>
+        </div>
+      </div>
+
+      <h2 id="codebase-overview">Codebase Overview</h2>
+
+      <p>The source is organized into a flat-ish top-level directory with clearly named subdirectories for each system. Here are the most important entry points and directories:</p>
+
+      <div class="badge-row">
+        <span class="badge badge-blue">main.tsx - CLI entry point</span>
+        <span class="badge badge-coral">query.ts - Core query pipeline</span>
+        <span class="badge badge-purple">QueryEngine.ts - SDK/headless engine</span>
+        <span class="badge badge-green">Tool.ts - Tool type definitions</span>
+        <span class="badge badge-gray">tools/ - 46+ tool implementations</span>
+        <span class="badge badge-gray">commands/ - 80+ slash commands</span>
+        <span class="badge badge-gray">skills/ - Bundled skill scripts</span>
+        <span class="badge badge-gray">services/ - MCP, compact, API</span>
+        <span class="badge badge-gray">hooks/ - React hooks for CLI</span>
+        <span class="badge badge-gray">state/ - Zustand-like app state</span>
+      </div>
+
+      <h3 id="tech-stack">Technology Stack</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Layer</th><th>Technology</th><th>Why it's used</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Language</td><td>TypeScript (strict)</td><td>Full type safety across 1,900+ files; discriminated union message types, Zod schemas</td></tr>
+            <tr><td>Runtime &amp; Bundler</td><td>Node.js 18+ / Bun</td><td>Bun's <code>feature()</code> macro enables compile-time dead-code elimination for feature flags</td></tr>
+            <tr><td>Terminal UI</td><td>React + Ink</td><td>React component model for streaming terminal output; real-time diffs, progress spinners, dialogs</td></tr>
+            <tr><td>State</td><td>Custom Zustand-like store</td><td>Single <code>AppState</code> source of truth; synchronous immutable updates; no Redux overhead</td></tr>
+            <tr><td>API Client</td><td><code>@anthropic-ai/sdk</code></td><td>Official SDK with streaming, tool_use, beta feature support</td></tr>
+            <tr><td>Schema Validation</td><td>Zod</td><td>All tool inputs validated before execution; input schemas double as API tool schemas</td></tr>
+            <tr><td>CLI Framework</td><td>Commander.js</td><td>Argument parsing and sub-command routing for the CLI entry point</td></tr>
+            <tr><td>MCP</td><td><code>@modelcontextprotocol/sdk</code></td><td>Dynamic MCP server management, OAuth flows, tool discovery</td></tr>
+            <tr><td>Analytics</td><td>GrowthBook</td><td>Feature gating at runtime, A/B testing, experiment tracking</td></tr>
+            <tr><td>HTTP</td><td>Axios</td><td>Internal HTTP requests (bridge, remote sessions, MCP auth)</td></tr>
+            <tr><td>Linting</td><td>Biome</td><td>Fast Rust-based linter/formatter replacing ESLint + Prettier</td></tr>
+            <tr><td>Colors</td><td>Chalk</td><td>Terminal color output for non-Ink code paths</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="how-it-works">How It Works: The Big Picture</h2>
+
+      <p>Every time you type a message, this is what happens under the hood. It is not magic, but rather it is a well-structured loop that any developer can read and understand:</p>
+
+      <div class="flow">
+        <div class="flow-item">User Input</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">Context Assembly</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">API Stream</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">Tool Dispatch</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">Response / Loop</div>
+      </div>
+
+      <p>The <strong>interactive REPL</strong> path renders each step with a rich Ink UI: tool use messages appear as they stream, progress spinners run during long operations, and the user can interrupt at any time. The <strong>headless SDK path</strong> (via <code>QueryEngine</code>) exposes the same pipeline as an async generator yielding <code>SDKMessage</code> events, suitable for programmatic embedding in other tools.</p>
+
+      <h3 id="permission-model">Built-in Safety</h3>
+
+      <p>Every tool call passes through a layered permission system before execution. In the default <em>interactive</em> mode, the user is prompted to approve dangerous operations. The permission system supports configurable allow/deny rules, auto-approval modes, and even a lightweight LLM-based classifier that can make real-time security decisions in automated workflows.</p>
+
+      <h2 id="navigation">Explore the Documentation</h2>
+      <p>Each section below covers one piece of the puzzle. Start with Architecture if you're new, or jump straight to Tools or Security if you know what you're looking for.</p>
+
+      <div class="nav-cards">
+        <a href="architecture.html" class="nav-card">
+          <div class="nav-card-icon"><i data-lucide="layers"></i></div>
+          <h3>System Architecture</h3>
+          <p>Main event loop, directory structure, component interactions, and state management flow.</p>
+        </a>
+        <a href="query-engine.html" class="nav-card">
+          <div class="nav-card-icon"><i data-lucide="zap"></i></div>
+          <h3>Query Engine</h3>
+          <p>How query.ts and QueryEngine.ts work, context assembly pipeline, API streaming, and message compaction.</p>
+        </a>
+        <a href="tools.html" class="nav-card">
+          <div class="nav-card-icon"><i data-lucide="wrench"></i></div>
+          <h3>Tools System</h3>
+          <p>Tool interface definition, dispatch mechanism, all 46+ built-in tools, and how to build your own.</p>
+        </a>
+        <a href="security.html" class="nav-card">
+          <div class="nav-card-icon"><i data-lucide="shield"></i></div>
+          <h3>Security &amp; Permissions</h3>
+          <p>Permission modes, canUseTool(), dangerous operation dialogs, JWT bridge, and API key handling.</p>
+        </a>
+        <a href="best-practices.html" class="nav-card">
+          <div class="nav-card-icon"><i data-lucide="star"></i></div>
+          <h3>Best Practices</h3>
+          <p>Patterns from this codebase: feature flags, hook architecture, lazy loading, and more.</p>
+        </a>
+        <a href="mcp-skills.html" class="nav-card">
+          <div class="nav-card-icon"><i data-lucide="plug"></i></div>
+          <h3>MCP &amp; Skills</h3>
+          <p>Model Context Protocol integration, skill system, bundled skills, and writing your own skill.</p>
+        </a>
+        <a href="interpret.html" class="nav-card" style="border-color: var(--coral); background: linear-gradient(135deg, rgba(217,119,87,0.05), rgba(139,92,246,0.05));">
+          <div class="nav-card-icon"><i data-lucide="compass"></i></div>
+          <h3>Navigate the Source ✦</h3>
+          <p>How to trace any Claude behavior back to its source, influence decisions via CLAUDE.md, and understand what every file controls.</p>
+        </a>
+      </div>
+
+      <h2 id="feature-flags">Feature Flags</h2>
+
+      <p>Several features are gated by Bun's dead-code elimination via <code>feature()</code> calls in <code>tools.ts</code> and <code>query.ts</code>. Features with this flag are literally removed from the compiled binary when disabled — zero bytes, zero runtime cost.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Flag</th><th>Feature</th><th>Key file</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>KAIROS</code></td><td>KAIROS assistant mode — alternative interaction paradigm</td><td><code>assistant/index.ts</code></td></tr>
+            <tr><td><code>VOICE_MODE</code></td><td>Voice input/output support</td><td><code>voice/</code></td></tr>
+            <tr><td><code>BRIDGE_MODE</code></td><td>Remote WebSocket bridge for cloud-hosted execution</td><td><code>bridge/bridgeMain.ts</code></td></tr>
+            <tr><td><code>DAEMON</code></td><td>Background daemon process for persistent sessions</td><td><code>entrypoints/</code></td></tr>
+            <tr><td><code>COORDINATOR_MODE</code></td><td>Multi-agent coordinator orchestrating swarms</td><td><code>coordinator/coordinatorMode.ts</code></td></tr>
+            <tr><td><code>PROACTIVE</code></td><td>Proactive task suggestions + SleepTool</td><td><code>tools/SleepTool/</code></td></tr>
+            <tr><td><code>AGENT_TRIGGERS</code></td><td>Cron-based agent scheduling via ScheduleCronTool</td><td><code>tools/ScheduleCronTool/</code></td></tr>
+            <tr><td><code>WORKFLOW_SCRIPTS</code></td><td>Multi-step scripted workflow automation</td><td><code>commands/workflows/</code></td></tr>
+            <tr><td><code>REACTIVE_COMPACT</code></td><td>Automatic reactive context window compaction</td><td><code>services/compact/reactiveCompact.ts</code></td></tr>
+            <tr><td><code>CONTEXT_COLLAPSE</code></td><td>Aggressive context collapsing for very long sessions</td><td><code>services/contextCollapse/</code></td></tr>
+            <tr><td><code>MONITOR_TOOL</code></td><td>Task monitoring tool for background agent supervision</td><td><code>tools/</code></td></tr>
+            <tr><td><code>EXPERIMENTAL_SKILL_SEARCH</code></td><td>Fuzzy search for skill discovery</td><td><code>skills/</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="startup-sequence">Startup Sequence</h2>
+
+      <p>The <code>main.tsx</code> entry point uses a clever trick to optimize startup time: several expensive async operations are <strong>fired before imports complete</strong> using top-level side effects. Here is the sequence in chronological order:</p>
+
+      <ol class="steps">
+        <li class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Profile checkpoint</strong>
+            <code>profileCheckpoint('main_tsx_entry')</code> marks the entry timestamp before any module evaluation begins, enabling startup profiling.
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>MDM raw read (parallel)</strong>
+            <code>startMdmRawRead()</code> fires MDM policy subprocess reads (<code>plutil</code> on macOS, <code>reg query</code> on Windows) so they run concurrently with the remaining ~135ms of module initialization.
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Keychain prefetch (parallel)</strong>
+            <code>startKeychainPrefetch()</code> fires both macOS keychain reads (OAuth token + legacy API key) in parallel. Without this, they would execute sequentially via sync spawn, costing ~65ms on every macOS startup.
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>CLI argument parsing</strong>
+            Commander.js parses <code>argv</code> and routes to the appropriate sub-command (REPL, print, chat, etc.).
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>Initialization</strong>
+            <code>init()</code> bootstraps auth, config, GrowthBook feature flags, MCP connections, tool list, and system prompt.
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <strong>REPL launch or headless query</strong>
+            Depending on the invocation, either launches the Ink REPL (<code>launchRepl()</code>) or runs a single query through <code>QueryEngine</code>.
+          </div>
+        </li>
+      </ol>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon"><i data-lucide="lightbulb"></i></span>
+        <div class="callout-body">
+          <p><strong>Performance insight:</strong> The aggressive parallelism in startup (MDM reads, keychain reads, GrowthBook fetches, MCP URL prefetch, AWS/GCP credential prefetch) is a deliberate design choice. Many of these are I/O-bound and take 50-200ms each. By firing them all before the main initialization flow, Claude Code achieves a responsive first-prompt experience even on slow systems.</p>
+        </div>
+      </div>
+
+      <h2 id="key-design-decisions">Key Design Decisions</h2>
+
+      <p>Several architectural choices stand out when reading the codebase:</p>
+
+      <ul>
+        <li><strong>Bun as bundler + runtime:</strong> By using Bun's macro features for conditional compilation, Anthropic can strip out beta features (like 'coordinator mode') entirely at build time, keeping the final binary fast and lean.</li>
+        <li><strong>React for the terminal:</strong> React in a terminal sounds bizarre until you try to build a streaming, interactive CLI with nested tool progress and inline diffs. Then it makes total sense.</li>
+        <li><strong>Single source of truth for tools:</strong> The same tool object defines the API schema, validates parameters, checks user permissions, renders the UI, and reports progress. It eliminates massive amounts of boilerplate.</li>
+        <li><strong>Two-path architecture:</strong> Code reuse at its finest. The interactive REPL and the programmatic SDK both wrap the exact same core pipeline (<code>query.ts</code>), just rendering the output differently.</li>
+        <li><strong>MCP as the extension mechanism:</strong> Instead of building a bespoke plugin system, they lean hard into the Model Context Protocol. You can hook into Claude Code using any external tool server without touching the core code.</li>
+      </ul>
+
+      <section class="faq-section" id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details class="faq-item">
+          <summary>How do I install this leaked version of Claude Code?</summary>
+          <div class="faq-content">You don't — this guide is strictly educational. It exists to study the codebase architecture, not to run it.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What are the key takeaways from the Claude Code source?</summary>
+          <div class="faq-content">It reveals incredible patterns for an agentic loop, robust tool dispatching, compact context management, and graceful rendering of terminal UI using React.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Is it legal to study leaked code?</summary>
+          <div class="faq-content">This repository serves as educational material on state-of-the-art AI agent design. Use it to learn design and architectural patterns, not to reproduce proprietary systems.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What language is Claude Code built in?</summary>
+          <div class="faq-content">It is built heavily in TypeScript, utilizing Node.js with Bun for bundling and React Ink for terminal rendering.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Where should I start if I want to learn the system?</summary>
+          <div class="faq-content">Start with the Architecture page to understand the core loop, then read about the Query Engine and Tool Dispatching.</div>
+        </details>
+      </section>
+
+    </main>
+
+    <!-- Right TOC -->
+    <nav class="toc" aria-label="On this page">
+      <div class="toc-title">On This Page</div>
+      <ul class="toc-list" id="toc-list"></ul>
+    </nav>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  });
+</script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

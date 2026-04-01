@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Query Engine Deep Dive | Learn from Claude Leaked Code</title>
+  <meta name="description" content="How Claude Code's query.ts and QueryEngine.ts work: context assembly, API streaming, tool dispatch, and message compaction." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">CC</div>
+      <span class="logo-text">Learn from Claude <span>Leaked Code</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+      <button class="btn-icon hamburger" id="hamburger" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle dark mode">
+        <span id="theme-icon">
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" style="display:none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span class="nav-icon"><i data-lucide="book-open"></i></span> Introduction</a>
+        <a href="architecture.html"><span class="nav-icon"><i data-lucide="layers"></i></span> Architecture</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Systems</div>
+      <nav class="sidebar-nav">
+        <a href="query-engine.html" class="active"><span class="nav-icon"><i data-lucide="zap"></i></span> Query Engine</a>
+        <a href="tools.html"><span class="nav-icon"><i data-lucide="wrench"></i></span> Tools System</a>
+        <a href="security.html"><span class="nav-icon"><i data-lucide="shield"></i></span> Security &amp; Permissions</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Advanced</div>
+      <nav class="sidebar-nav">
+        <a href="best-practices.html"><span class="nav-icon"><i data-lucide="star"></i></span> Best Practices</a>
+        <a href="mcp-skills.html"><span class="nav-icon"><i data-lucide="plug"></i></span> MCP &amp; Skills</a>
+        <a href="interpret.html"><span class="nav-icon"><i data-lucide="compass"></i></span> Navigate the Source</a>
+      </nav>
+    </div>
+    <div class="sidebar-download">
+      <a href="https://github.com/Shreyan1/claude-code-src-leaked" target="_blank" rel="noopener" class="download-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.66-.17.61-.19 1.25-.05 1.87L9 22"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        View Full Leaked Code
+      </a>
+      <p class="download-note">On GitHub &middot; Shreyan1/claude-code-src-leaked</p>
+      <a href="https://www.linkedin.com/in/shreyanbasuray/" target="_blank" rel="noopener" class="linkedin-follow-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Follow on LinkedIn
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="content-wrapper">
+    <main class="page-content">
+
+      <div class="breadcrumb">
+        <a href="index.html">Learn from Claude Leaked Code</a>
+        <span class="sep">/</span>
+        <span>Query Engine</span>
+      </div>
+
+      <span class="section-tag">Core System</span>
+      <h1>Query Engine Deep Dive</h1>
+      <p class="page-intro">The query engine is the beating heart of Claude Code: the pipeline that takes a user message and produces a complete agentic response. It spans two files: <code>query.ts</code> (the shared agentic loop) and <code>QueryEngine.ts</code> (the SDK-facing class wrapper).</p>
+
+      <h2 id="two-files-one-loop">Two Files, One Loop</h2>
+
+      <p>It is important to understand the relationship between these two files before diving into either:</p>
+
+      <ul>
+        <li><code><strong>query.ts</strong></code>: An async generator function that takes a user message plus context and yields streaming events. It implements the full agentic loop: API request → stream parse → tool dispatch → loop. This function is used by <em>both</em> the REPL and the SDK.</li>
+        <li><code><strong>QueryEngine.ts</strong></code>: A class that wraps <code>query.ts</code> for the headless/SDK use case. It owns session state (message history, file cache, usage totals) and exposes a <code>submitMessage()</code> async generator. The REPL doesn't use this class, it manages its own state through the Ink component tree and calls <code>query.ts</code> directly via <code>ask()</code>.</li>
+      </ul>
+
+      <h2 id="query-engine-class">The QueryEngine Class</h2>
+
+      <p>The <code>QueryEngine</code> class (1,295 lines) is the primary interface for programmatic use of Claude Code. You create one instance per conversation and call <code>submitMessage()</code> for each user turn:</p>
+
+      <pre><code class="language-typescript">// QueryEngine configuration
+export type QueryEngineConfig = {
+  cwd: string
+  tools: Tools
+  commands: Command[]
+  mcpClients: MCPServerConnection[]
+  agents: AgentDefinition[]
+  canUseTool: CanUseToolFn
+  getAppState: () =&gt; AppState
+  setAppState: (f: (prev: AppState) =&gt; AppState) =&gt; void
+
+  // Optional session controls
+  initialMessages?: Message[]
+  readFileCache: FileStateCache
+  customSystemPrompt?: string
+  appendSystemPrompt?: string
+  userSpecifiedModel?: string
+  fallbackModel?: string
+  thinkingConfig?: ThinkingConfig
+  maxTurns?: number
+  maxBudgetUsd?: number
+  verbose?: boolean
+}
+
+// One instance per conversation
+const engine = new QueryEngine(config)
+
+// Each message is an async generator of SDK events
+for await (const event of engine.submitMessage("Fix the bug in main.ts")) {
+  switch (event.type) {
+    case 'text':      console.log(event.text); break
+    case 'tool_use':  console.log('Tool:', event.name); break
+    case 'result':    console.log('Done:', event.stop_reason); break
+  }
+}</code></pre>
+
+      <h3 id="session-state">Session State</h3>
+
+      <p>The <code>QueryEngine</code> maintains several pieces of mutable state across turns:</p>
+
+      <ul>
+        <li><code>mutableMessages</code>: The full conversation history, grown by each turn.</li>
+        <li><code>abortController</code>: Shared abort signal; calling <code>engine.interrupt()</code> cancels in-flight requests.</li>
+        <li><code>permissionDenials</code>: Accumulated record of denied tool calls, yielded as <code>SDKPermissionDenial</code> events.</li>
+        <li><code>totalUsage</code>: Aggregated token usage across all turns.</li>
+        <li><code>readFileState</code>: LRU cache of file contents read this session (prevents re-reading unchanged files).</li>
+        <li><code>discoveredSkillNames</code>: Turn-scoped set of skills surfaced via skill discovery (cleared at start of each <code>submitMessage()</code>).</li>
+        <li><code>loadedNestedMemoryPaths</code>: Deduplication set for CLAUDE.md attachment injection (persists across turns to prevent repeated injections).</li>
+      </ul>
+
+      <h2 id="context-assembly">Context Assembly Pipeline</h2>
+
+      <p>Before an API request is made, <code>query.ts</code> assembles the full context. This is not a simple message list copy, it involves several transformation stages:</p>
+
+      <ol>
+        <li><strong>Message normalization:</strong> <code>normalizeMessagesForAPI()</code> strips all UI-only message types (progress messages, system local command messages, tombstones) and ensures the message list starts with a <code>user</code> role message.</li>
+        <li><strong>Attachment injection:</strong> <code>getAttachmentMessages()</code> scans the working directory tree for CLAUDE.md files and injects them as <code>AttachmentMessage</code> entries. The <code>nestedMemoryAttachmentTriggers</code> set and <code>loadedNestedMemoryPaths</code> prevent redundant re-injection on every turn.</li>
+        <li><strong>Memory prompt prepend:</strong> <code>loadMemoryPrompt()</code> reads the global memory directory (~/.claude/memory/) and prepends it to the user context.</li>
+        <li><strong>User context prepend:</strong> <code>prependUserContext()</code> adds workspace-specific context (cwd, git status, etc.) to the first user message.</li>
+        <li><strong>System prompt fetch:</strong> <code>fetchSystemPromptParts()</code> assembles the system prompt from multiple sources: base prompt + tool prompts (each tool's <code>prompt()</code> method) + any custom/append prompts.</li>
+        <li><strong>Tool schema generation:</strong> Each enabled tool's <code>inputSchema</code> (a Zod schema) is converted to JSON Schema and included in the API request's <code>tools</code> array.</li>
+      </ol>
+
+      <pre><code class="language-typescript">// Simplified context assembly (from query.ts)
+async function assembleContext(messages, toolUseContext) {
+  // 1. Normalize messages - strip UI-only types
+  const apiMessages = normalizeMessagesForAPI(messages)
+
+  // 2. Inject CLAUDE.md memory files
+  const attachments = await getAttachmentMessages(
+    cwd,
+    toolUseContext.nestedMemoryAttachmentTriggers,
+    toolUseContext.loadedNestedMemoryPaths
+  )
+
+  // 3. Load global memory
+  const memoryPrompt = await loadMemoryPrompt()
+
+  // 4. Fetch system prompt parts (lazy - cached after first call)
+  const systemPromptParts = await fetchSystemPromptParts({
+    tools, commands, mcpClients, agents, ...
+  })
+
+  return {
+    system: asSystemPrompt(systemPromptParts),
+    messages: [...attachments, ...apiMessages],
+    tools: tools.map(t =&gt; toAPISchema(t))
+  }
+}</code></pre>
+
+      <h2 id="api-streaming">API Streaming Flow</h2>
+
+      <p>Claude Code uses the Anthropic SDK's streaming API. Each API call streams <code>StreamEvent</code> objects that are processed and forwarded to the UI in real time:</p>
+
+      <div class="mindmap-wrap">
+  <svg style="max-width: 640px;" viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg" class="mindmap-svg" role="img" aria-label="API streaming event flow">
+    <defs>
+      <marker id="ahs" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d97757"/></marker>
+      <marker id="ahs2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#4a5568"/></marker>
+    </defs>
+
+    <!-- API Request -->
+    <rect x="190" y="12" width="260" height="52" rx="9" fill="#1e1e35" stroke="#d97757" stroke-width="1.8"/>
+    <text x="320" y="34" fill="#d97757" font-family="Inter,sans-serif" font-size="12" font-weight="700" text-anchor="middle">API Request Sent</text>
+    <text x="320" y="54" fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle">messages + system prompt + tool schemas</text>
+
+    <line x1="320" y1="64" x2="320" y2="80" stroke="#d97757" stroke-width="1.5" marker-end="url(#ahs)"/>
+
+    <!-- Stream opens -->
+    <rect x="190" y="83" width="260" height="46" rx="9" fill="#1a150e" stroke="#f59e0b" stroke-width="1.6"/>
+    <text x="320" y="104" fill="#fde68a" font-family="Inter,sans-serif" font-size="12" font-weight="700" text-anchor="middle">Stream Opens</text>
+    <text x="320" y="121" fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle">content_block_start · SSE connection</text>
+
+    <!-- fan out -->
+    <line x1="320" y1="129" x2="320" y2="150" stroke="#4a5568" stroke-width="1.3"/>
+    <line x1="90" y1="150" x2="550" y2="150" stroke="#4a5568" stroke-width="1.3"/>
+    <line x1="90" y1="150" x2="90" y2="164" stroke="#8b5cf6" stroke-width="1.3" marker-end="url(#ahs2)"/>
+    <line x1="320" y1="150" x2="320" y2="164" stroke="#10b981" stroke-width="1.3" marker-end="url(#ahs2)"/>
+    <line x1="550" y1="150" x2="550" y2="164" stroke="#3b82f6" stroke-width="1.3" marker-end="url(#ahs2)"/>
+
+    <!-- TEXT branch -->
+    <rect x="18" y="166" width="200" height="98" rx="8" fill="#1a1040" stroke="#8b5cf6" stroke-width="1.5"/>
+    <text x="118" y="187" fill="#a78bfa" font-family="Inter,sans-serif" font-size="10" font-weight="700" text-anchor="middle" letter-spacing="0.08em">type: "text"</text>
+    <text x="118" y="206" fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">content_block_delta</text>
+    <text x="118" y="221" fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">(text_delta)</text>
+    <text x="118" y="240" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">→ render incrementally</text>
+    <text x="118" y="256" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">to terminal</text>
+
+    <!-- TOOL_USE branch -->
+    <rect x="220" y="166" width="200" height="130" rx="8" fill="#0e2620" stroke="#10b981" stroke-width="1.5"/>
+    <text x="320" y="187" fill="#6ee7b7" font-family="Inter,sans-serif" font-size="10" font-weight="700" text-anchor="middle" letter-spacing="0.08em">type: "tool_use"</text>
+    <text x="320" y="206" fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">content_block_delta</text>
+    <text x="320" y="221" fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">(input_json_delta)</text>
+    <text x="320" y="240" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">→ accumulate JSON input</text>
+    <text x="320" y="256" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">content_block_stop</text>
+    <text x="320" y="272" fill="#d97757" font-family="Inter,sans-serif" font-size="10" font-weight="600" text-anchor="middle">→ dispatch tool call</text>
+    <text x="320" y="288" fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">→ loop with results</text>
+
+    <!-- MESSAGE_STOP branch -->
+    <rect x="422" y="166" width="200" height="120" rx="8" fill="#0e1a28" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="522" y="187" fill="#93c5fd" font-family="Inter,sans-serif" font-size="10" font-weight="700" text-anchor="middle" letter-spacing="0.08em">message_stop</text>
+    <text x="522" y="208" fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">stop_reason:</text>
+    <text x="522" y="227" fill="#fde68a" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">"end_turn"</text>
+    <text x="522" y="243" fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">→ final response · exit</text>
+    <text x="522" y="261" fill="#fde68a" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">"tool_use"</text>
+    <text x="522" y="277" fill="#d97757" font-family="Inter,sans-serif" font-size="10" font-weight="600" text-anchor="middle">→ loop again</text>
+
+    <!-- Converge line to Tool Dispatch box -->
+    <line x1="220" y1="296" x2="220" y2="318" stroke="#4a5568" stroke-width="1.2"/>
+    <line x1="420" y1="296" x2="420" y2="318" stroke="#4a5568" stroke-width="1.2"/>
+    <line x1="220" y1="318" x2="420" y2="318" stroke="#4a5568" stroke-width="1.2"/>
+    <line x1="320" y1="318" x2="320" y2="332" stroke="#d97757" stroke-width="1.5" marker-end="url(#ahs)"/>
+    <rect x="190" y="334" width="260" height="52" rx="9" fill="#1e1e35" stroke="#d97757" stroke-width="1.6"/>
+    <text x="320" y="356" fill="#d97757" font-family="Inter,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Tool Dispatch &amp; Loop</text>
+    <text x="320" y="375" fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle">canUseTool() → call() → append result → re-query</text>
+  </svg>
+</div>
+
+      <p>The streaming parser buffers incoming deltas and fires rendering callbacks as each block completes. This gives the terminal UI its characteristic "streaming text" effect where Claude's response appears character by character.</p>
+
+      <h3 id="error-handling">Error Handling and Retry</h3>
+
+      <p>The API layer in <code>services/api/</code> wraps the raw SDK with retry logic via <code>withRetry.js</code>. A <code>FallbackTriggeredError</code> is thrown when the primary model fails and a fallback model is specified (e.g., if the user specified a premium model but it's unavailable). The <code>categorizeRetryableAPIError()</code> function classifies errors into retryable vs. terminal categories.</p>
+
+      <pre><code class="language-typescript">// Error categories in query.ts
+type RetryableCategory =
+  | 'overloaded'       // 529 - retry with backoff
+  | 'rate_limited'     // 429 - wait for reset
+  | 'server_error'     // 500/502/503 - retry
+  | 'fallback'         // Model unavailable - switch model
+  | 'non_retryable'    // 400/401/403 - fail immediately
+
+// Prompt too long is a special case
+if (isPromptTooLongMessage(error)) {
+  // Try compaction first, then fail if already compacted
+  await attemptCompaction()
+}</code></pre>
+
+      <h2 id="tool-dispatch">Tool Dispatch Mechanism</h2>
+
+      <p>When the stream produces a <code>tool_use</code> content block, the dispatch sequence begins. This is one of the most complex parts of the codebase because tools can run concurrently, update UI state via callbacks, and modify the conversation context:</p>
+
+      <ol>
+        <li><strong>Find tool:</strong> <code>findToolByName(tools, name)</code> looks up by primary name or any alias.</li>
+        <li><strong>Validate input:</strong> <code>tool.validateInput(input, context)</code> runs Zod schema validation plus tool-specific checks.</li>
+        <li><strong>Check permissions:</strong> <code>canUseTool(tool, input, context, ...)</code> runs the full permission pipeline (see Security page).</li>
+        <li><strong>Execute:</strong> <code>tool.call(input, context, canUseTool, parentMessage, onProgress)</code> runs the actual tool logic, which may run subagents, shell commands, file operations, etc.</li>
+        <li><strong>Collect result:</strong> The returned <code>ToolResult&lt;T&gt;</code> contains <code>data</code> plus optional <code>newMessages</code> (for tools that inject additional context) and <code>contextModifier</code> (for tools that need to update the <code>ToolUseContext</code>).</li>
+        <li><strong>Format for API:</strong> <code>tool.mapToolResultToToolResultBlockParam(data, toolUseId)</code> serializes the result into the format the API expects.</li>
+      </ol>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon"><i data-lucide="alert-triangle"></i></span>
+        <div class="callout-body">
+          <p><strong>Concurrency note:</strong> Tools with <code>isConcurrencySafe() === true</code> can run in parallel when the model requests multiple tool calls in one response. Tools with <code>isConcurrencySafe() === false</code> (the default) are serialized. The <code>contextModifier</code> returned by a tool is only honored for non-concurrent tools because ordering matters for context mutation.</p>
+        </div>
+      </div>
+
+      <h2 id="message-compaction">Message Compaction Strategy</h2>
+
+      <p>Every AI conversation has a finite context window. Claude Code has a sophisticated multi-strategy compaction system in <code>services/compact/</code> that activates when the token count approaches the limit:</p>
+
+      <h3 id="compaction-strategies">Compaction Strategies</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>File</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Standard Compact</strong></td>
+              <td><code>compact.ts</code></td>
+              <td>Full summarization: sends the entire conversation to Claude and asks for a detailed summary. The summary replaces all history before the compact boundary.</td>
+            </tr>
+            <tr>
+              <td><strong>Auto Compact</strong></td>
+              <td><code>autoCompact.ts</code></td>
+              <td>Triggered automatically when token usage crosses a threshold. Runs without user intervention in non-interactive mode.</td>
+            </tr>
+            <tr>
+              <td><strong>Microcompact</strong></td>
+              <td><code>microCompact.ts</code></td>
+              <td>Lighter-weight compaction: summarizes only older tool-use exchanges while keeping recent context intact. Faster than full compaction.</td>
+            </tr>
+            <tr>
+              <td><strong>Reactive Compact</strong></td>
+              <td><code>reactiveCompact.ts</code></td>
+              <td>Feature-flagged (<code>REACTIVE_COMPACT</code>). Dynamically compacts in response to context pressure signals.</td>
+            </tr>
+            <tr>
+              <td><strong>Session Memory</strong></td>
+              <td><code>sessionMemoryCompact.ts</code></td>
+              <td>Extracts and persists important facts from a session to the memory directory before compacting.</td>
+            </tr>
+            <tr>
+              <td><strong>Snip</strong></td>
+              <td><code>snipCompact.ts</code></td>
+              <td>Feature-flagged (<code>HISTORY_SNIP</code>). Removes specific tool-use exchanges by "snipping" them out rather than summarizing the whole history.</td>
+            </tr>
+            <tr>
+              <td><strong>API Microcompact</strong></td>
+              <td><code>apiMicrocompact.ts</code></td>
+              <td>Compacts individual tool results that are excessively large before they enter the message history.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="compact-boundary">Compact Boundaries</h3>
+
+      <p>When compaction runs, it inserts a <code>compactBoundaryMessage</code> into the history. The <code>getMessagesAfterCompactBoundary()</code> utility ensures that API requests only include messages after the most recent boundary, the compacted summary lives as the first message in the trimmed window.</p>
+
+      <pre><code class="language-typescript">// After compaction, message history looks like:
+[
+  // CompactBoundaryMessage (marker)
+  { type: 'system', subtype: 'compact_boundary', summary: 'Prior work...' },
+
+  // Only post-compact messages sent to API
+  { role: 'user', content: 'Now fix the remaining issue...' },
+  { role: 'assistant', content: [{ type: 'text', text: '...' }] },
+  // ...
+]
+
+// getMessagesAfterCompactBoundary() returns only post-boundary messages
+// The summary is prepended to the system prompt automatically</code></pre>
+
+      <h2 id="tool-use-summary">Tool Use Summary Generation</h2>
+
+      <p>For long tool-use sequences (e.g., a complex file edit that involves 10 rounds of reading, editing, and verifying), the system can replace the entire exchange with a <code>ToolUseSummaryMessage</code>: a compact text representation of what was done. This is generated by <code>generateToolUseSummary()</code> in <code>services/toolUseSummary/</code>.</p>
+
+      <p>The summary is used both for display (showing a condensed history in the REPL) and for API requests (replacing a large tool-exchange block with a small text description, saving tokens).</p>
+
+      <h2 id="slash-command-routing">Slash Command Routing</h2>
+
+      <p>Before a message reaches the API, <code>processUserInput()</code> checks if it is a slash command. The routing logic handles several special cases:</p>
+
+      <ul>
+        <li><strong>Local commands</strong> (e.g., <code>/compact</code>, <code>/clear</code>, <code>/config</code>) are handled entirely client-side, never sent to the API.</li>
+        <li><strong>Skill commands</strong> (e.g., <code>/commit</code>, <code>/review</code>, custom user scripts): the skill file is loaded, its template is expanded, and the result is submitted as a user message.</li>
+        <li><strong>Tool skills</strong> (e.g., <code>/bash</code>): creates a synthetic tool_use message to immediately invoke a tool.</li>
+        <li><strong>Priority queue:</strong> <code>getCommandsByMaxPriority()</code> allows system-level commands to preempt user commands when the queue has multiple pending messages.</li>
+      </ul>
+
+      <div class="callout callout-info">
+        <span class="callout-icon"><i data-lucide="info"></i></span>
+        <div class="callout-body">
+          <p>The <code>notifyCommandLifecycle()</code> call in <code>query.ts</code> fires analytics events for command start/end, enabling usage tracking for each slash command type. This is how Anthropic measures which features are actually used.</p>
+        </div>
+      </div>
+
+      <h2 id="system-prompt-assembly">Inside <code>prompts.ts</code>: How the System Prompt is Built</h2>
+
+      <p>The system prompt isn't a static string — it's assembled fresh on every session from roughly a dozen composable sections, each gated by runtime conditions, feature flags, and user type. The source of truth is <code>src/prompts/prompts.ts</code>, a ~700-line file that is one of the most revealing files in the entire codebase.</p>
+
+      <h3 id="cache-boundary">The Static/Dynamic Cache Boundary</h3>
+
+      <p>Near the top of <code>prompts.ts</code> sits one of the most architecturally important constants in Claude Code:</p>
+
+      <pre><code class="language-typescript">/**
+ * Boundary marker separating static (cross-org cacheable) content
+ * from dynamic content.
+ * Everything BEFORE this marker can use scope: 'global'.
+ * Everything AFTER contains user/session-specific content and
+ * should not be cached globally.
+ *
+ * WARNING: Do not remove or reorder this marker without updating
+ * cache logic in api.ts and services/api/claude.ts
+ */
+export const SYSTEM_PROMPT_DYNAMIC_BOUNDARY =
+  '__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__'</code></pre>
+
+      <p>The system prompt array is split at this marker. Everything before it (the core instructions, tool guidance, behavior rules) is structured as <strong>globally cacheable</strong> with Anthropic's prompt caching infrastructure — it will be the same hash across all external user sessions, so the API can return a cache hit and skip most of the prompt processing cost. Everything after the marker includes session-specific data like the current working directory, git status, OS version, date, and loaded skills — all of which change per session and cannot be shared in cache.</p>
+
+      <p>This is why arbitrary modifications to CLAUDE.md at the system level (before the boundary) are discouraged — changing even one word before the boundary breaks the global cache key for every user simultaneously.</p>
+
+      <h3 id="two-tier-users">The Two-Tier User System</h3>
+
+      <p>The single most consequential branch in the entire prompts file is this check, which appears dozens of times:</p>
+
+      <pre><code class="language-typescript">process.env.USER_TYPE === 'ant'</code></pre>
+
+      <p>When this environment variable is set to <code>'ant'</code> (short for Anthropic), Claude receives a substantially different system prompt than external users. The ant-tier receives additional instructions that Anthropic is still validating before rolling out broadly:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Behavior</th><th>External Users</th><th>Anthropic Employees (ant)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Comment writing</td><td>Standard guidance</td><td>Strict "no comments unless WHY is non-obvious" rule; never explain WHAT</td></tr>
+            <tr><td>Output format</td><td>"Be extra concise. Lead with answer."</td><td>Flowing prose, inverted pyramid, full explanation, no fragments</td></tr>
+            <tr><td>Verification</td><td>Basic checking</td><td>Explicit: "Before reporting complete, verify it works; run the test."</td></tr>
+            <tr><td>Proactiveness</td><td>Standard</td><td>Extra: "If you notice a misconception, say so. You're a collaborator."</td></tr>
+            <tr><td>Accuracy reporting</td><td>Standard</td><td>Anti-false-claims mitigation: "Never claim 'all tests pass' when output shows failures."</td></tr>
+            <tr><td>Slack integration</td><td>None</td><td>Told to post <code>/share</code> links to #claude-code-feedback (C07VBSHV7EV)</td></tr>
+            <tr><td>REPL tool</td><td>Not available</td><td>Exposed via <code>process.env.USER_TYPE === 'ant'</code> guard</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The comments in the source code explicitly mark these as A/B experiments in progress, with annotations like <code>// @[MODEL LAUNCH]: capy v8 assertiveness counterweight (PR #24302) — un-gate once validated on external via A/B</code>. This is a live development pipeline: instructions get validated internally first, then gradually rolled out.</p>
+
+      <h3 id="model-codenames">Internal Model Codenames</h3>
+
+      <p>The source file contains developer-facing model codename annotations that reveal Anthropic's internal naming conventions and what's coming next:</p>
+
+      <pre><code class="language-typescript">// @[MODEL LAUNCH]: Update the latest frontier model.
+const FRONTIER_MODEL_NAME = 'Claude Opus 4.6'
+
+// Comments referencing internal codenames:
+// @[MODEL LAUNCH]: Remove this section when we launch numbat.
+// @[MODEL LAUNCH]: Update comment writing for Capybara — remove or soften
+//   once the model stops over-commenting by default
+// @[MODEL LAUNCH]: capy v8 thoroughness counterweight (PR #24302)
+// @[MODEL LAUNCH]: False-claims mitigation for Capybara v8 (29-30% FC rate
+//   vs v4's 16.7%)</code></pre>
+
+      <p><strong>Capybara</strong> is the internal codename for the currently deployed model family (Claude 4.x / Sonnet 4). <strong>Numbat</strong> is the next upcoming model, with a dedicated comment marking code that will need updating at its launch. The annotations also reveal active model quality issues being addressed — Capybara v8 had a 29-30% false-claims rate vs. v4's 16.7%, which is why ant users get the strict accuracy-reporting instructions that external users don't yet have.</p>
+
+      <h3 id="claude-code-simple">The Escape Hatch: <code>CLAUDE_CODE_SIMPLE</code></h3>
+
+      <p>At the very top of <code>getSystemPrompt()</code>, before any of the elaborate section assembly, there's a one-line escape hatch:</p>
+
+      <pre><code class="language-typescript">export async function getSystemPrompt(tools, model, ...): Promise&lt;string[]&gt; {
+  if (isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE)) {
+    return [
+      `You are Claude Code, Anthropic's official CLI for Claude.\n\nCWD: ${getCwd()}\nDate: ${getSessionStartDate()}`,
+    ]
+  }
+  // ... hundreds of lines of section assembly ...
+}</code></pre>
+
+      <p>Setting <code>CLAUDE_CODE_SIMPLE=1</code> collapses the entire elaborate system prompt into exactly two lines: identity + CWD + date. This is used for debugging and for scenarios where you explicitly want a blank-slate Claude with no behavioral guardrails loaded. It's also the fastest possible startup because none of the async section assembly runs.</p>
+
+      <h3 id="verification-agent-ab">The Verification Agent A/B Test</h3>
+
+      <p>One of the most fascinating sections in the file is the verification agent instruction, which is double-gated behind both a compile-time feature flag and a live GrowthBook experiment:</p>
+
+      <pre><code class="language-typescript">hasAgentTool &&
+feature('VERIFICATION_AGENT') &&
+// 3P default: false — verification agent is ant-only A/B
+getFeatureValue_CACHED_MAY_BE_STALE('tengu_hive_evidence', false)
+  ? `The contract: when non-trivial implementation happens on your turn,
+     independent adversarial verification must happen before you report
+     completion — regardless of who did the implementing (you directly,
+     a fork you spawned, or a subagent).
+     ...
+     Spawn the ${AGENT_TOOL_NAME} with subagent_type="${VERIFICATION_AGENT_TYPE}".
+     Your own checks do NOT substitute — only the verifier assigns a verdict.
+     On FAIL: fix, resume the verifier, repeat until PASS.
+     On PASS: spot-check it — re-run 2-3 commands from its report.`
+  : null</code></pre>
+
+      <p>When both the <code>VERIFICATION_AGENT</code> feature flag is compiled in AND the <code>tengu_hive_evidence</code> GrowthBook experiment assigns the user to the treatment group, Claude Code mandates that after any non-trivial implementation (3+ file edits, backend/API changes, infrastructure changes), a separate adversarial verification agent must run and pass before Claude can report completion. This is Anthropic's most aggressive attempt to reduce false "I'm done" claims in agentic workflows.</p>
+
+      <h3 id="cyber-risk-injection">The <code>CYBER_RISK_INSTRUCTION</code> Injection Point</h3>
+
+      <p>Inside <code>getSimpleIntroSection()</code>, a single import from <code>cyberRiskInstruction.ts</code> (see the Security page for a deep dive) is injected directly into the opening paragraph that every external user receives:</p>
+
+      <pre><code class="language-typescript">function getSimpleIntroSection(outputStyleConfig): string {
+  return `
+You are an interactive agent that helps users with software engineering tasks.
+Use the instructions below and the tools available to you to assist the user.
+
+${CYBER_RISK_INSTRUCTION}
+
+IMPORTANT: You must NEVER generate or guess URLs for the user unless you are
+confident that the URLs are for helping the user with programming.`
+}</code></pre>
+
+      <p>This means the cybersecurity policy lands in the very first paragraph of the system prompt, before all tool instructions and before the cache boundary. It cannot be overridden by CLAUDE.md, project settings, or custom system prompts because it's hardcoded into the section that runs before any user customization is applied.</p>
+
+      <h2 id="prefetching">Async Prefetching</h2>
+
+      <p>Claude Code aggressively prefetches data at startup and turn boundaries to minimize latency. Several prefetch operations run in parallel:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Prefetch</th>
+              <th>Purpose</th>
+              <th>When</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>startKeychainPrefetch()</code></td>
+              <td>Read OAuth token + API key from macOS keychain</td>
+              <td>Before any imports</td>
+            </tr>
+            <tr>
+              <td><code>startMdmRawRead()</code></td>
+              <td>MDM policy reads via plutil/reg query</td>
+              <td>Before any imports</td>
+            </tr>
+            <tr>
+              <td><code>prefetchOfficialMcpUrls()</code></td>
+              <td>Fetch official MCP registry</td>
+              <td>After auth</td>
+            </tr>
+            <tr>
+              <td><code>prefetchPassesEligibility()</code></td>
+              <td>Check referral pass eligibility</td>
+              <td>After auth</td>
+            </tr>
+            <tr>
+              <td><code>prefetchAwsCredentials()</code></td>
+              <td>AWS/Bedrock credential prefetch</td>
+              <td>If Bedrock configured</td>
+            </tr>
+            <tr>
+              <td><code>prefetchFastModeStatus()</code></td>
+              <td>Resolve fast-mode feature gate</td>
+              <td>At init</td>
+            </tr>
+            <tr>
+              <td><code>startRelevantMemoryPrefetch()</code></td>
+              <td>Pre-scan for relevant CLAUDE.md files</td>
+              <td>Per turn</td>
+            </tr>
+            <tr>
+              <td><code>skillPrefetch</code></td>
+              <td>Pre-index skills directory for search</td>
+              <td>When <code>EXPERIMENTAL_SKILL_SEARCH</code> enabled</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <section class="faq-section" id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details class="faq-item">
+          <summary>How does Claude Code compress context?</summary>
+          <div class="faq-content">It uses aggressive compaction techniques, prioritizing errors and recent interactions to keep the context window under the token limit without losing critical working history.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Does it use the standard Anthropic API?</summary>
+          <div class="faq-content">Yes, it interacts primarily via Anthropic's streaming SSE endpoints, allowing tool usages and incremental outputs to stream natively into the terminal.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What happens if the context limit is reached?</summary>
+          <div class="faq-content">The query engine will trigger a context collapse, stripping out older tool logs and retaining only the summaries of past actions to preserve the flow.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I customize the system prompt?</summary>
+          <div class="faq-content">The core system prompt is deeply synthesized from configuration, current environment context, and the tool schemas available at runtime, rather than being a static string.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How is token usage measured efficiently?</summary>
+          <div class="faq-content">Token lengths are rigorously tracked with a dedicated cost-tracker to measure limits and compute estimated dollar costs during interactions.</div>
+        </details>
+      </section>
+
+    </main>
+
+    <nav class="toc" aria-label="On this page">
+      <div class="toc-title">On This Page</div>
+      <ul class="toc-list" id="toc-list"></ul>
+    </nav>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  });
+</script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

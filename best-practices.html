@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Best Practices &amp; Patterns | Learn from Claude Leaked Code</title>
+  <meta name="description" content="Architecture patterns from the Claude Code codebase: feature flags, React hooks for CLI, tool abstraction, state management, and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">CC</div>
+      <span class="logo-text">Learn from Claude <span>Leaked Code</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+      <button class="btn-icon hamburger" id="hamburger" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle dark mode">
+        <span id="theme-icon">
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" style="display:none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span class="nav-icon"><i data-lucide="book-open"></i></span> Introduction</a>
+        <a href="architecture.html"><span class="nav-icon"><i data-lucide="layers"></i></span> Architecture</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Systems</div>
+      <nav class="sidebar-nav">
+        <a href="query-engine.html"><span class="nav-icon"><i data-lucide="zap"></i></span> Query Engine</a>
+        <a href="tools.html"><span class="nav-icon"><i data-lucide="wrench"></i></span> Tools System</a>
+        <a href="security.html"><span class="nav-icon"><i data-lucide="shield"></i></span> Security &amp; Permissions</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Advanced</div>
+      <nav class="sidebar-nav">
+        <a href="best-practices.html" class="active"><span class="nav-icon"><i data-lucide="star"></i></span> Best Practices</a>
+        <a href="mcp-skills.html"><span class="nav-icon"><i data-lucide="plug"></i></span> MCP &amp; Skills</a>
+        <a href="interpret.html"><span class="nav-icon"><i data-lucide="compass"></i></span> Navigate the Source</a>
+      </nav>
+    </div>
+    <div class="sidebar-download">
+      <a href="https://github.com/Shreyan1/claude-code-src-leaked" target="_blank" rel="noopener" class="download-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.66-.17.61-.19 1.25-.05 1.87L9 22"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        View Full Leaked Code
+      </a>
+      <p class="download-note">On GitHub &middot; Shreyan1/claude-code-src-leaked</p>
+      <a href="https://www.linkedin.com/in/shreyanbasuray/" target="_blank" rel="noopener" class="linkedin-follow-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Follow on LinkedIn
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="content-wrapper">
+    <main class="page-content">
+
+      <div class="breadcrumb">
+        <a href="index.html">Learn from Claude Leaked Code</a>
+        <span class="sep">/</span>
+        <span>Best Practices</span>
+      </div>
+
+      <span class="section-tag">Patterns</span>
+      <h1>Best Practices &amp; Patterns</h1>
+      <p class="page-intro">The Claude Code codebase is a rich source of production-tested patterns for building large TypeScript applications. This page distills the most interesting and reusable architectural decisions found throughout the source.</p>
+
+      <h2 id="feature-flag-dce">Pattern 1: Feature Flags via Dead Code Elimination</h2>
+
+      <p>Claude Code's most distinctive pattern is its use of Bun's <code>feature()</code> macro for dead-code elimination at build time. Rather than runtime feature flags that add overhead and complexity, this approach compiles out entire subsystems for builds where they're disabled:</p>
+
+      <pre><code class="language-typescript">// Before: runtime conditional (loads all code, checks at runtime)
+import * as reactiveCompact from './services/compact/reactiveCompact.js'
+if (process.env.FEATURE_REACTIVE_COMPACT) {
+  reactiveCompact.apply(...)
+}
+
+// After: build-time DCE with Bun (unused branch is never included)
+const reactiveCompact = feature('REACTIVE_COMPACT')
+  ? (require('./services/compact/reactiveCompact.js')
+      as typeof import('./services/compact/reactiveCompact.js'))
+  : null
+
+// Usage - null-safe pattern
+if (reactiveCompact) {
+  reactiveCompact.apply(...)
+}</code></pre>
+
+      <p>The advantages of this pattern are significant:</p>
+      <ul>
+        <li><strong>Zero runtime overhead</strong>, the feature check is evaluated once at build time, not on every code path.</li>
+        <li><strong>Smaller bundle</strong>, disabled features don't contribute any bytes to the output.</li>
+        <li><strong>No module evaluation</strong>, a disabled feature's imports are never executed, so its dependencies don't run.</li>
+        <li><strong>Type safety</strong>, the <code>typeof import()</code> in the ternary's true branch provides full type checking for the conditional module.</li>
+      </ul>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon"><i data-lucide="lightbulb"></i></span>
+        <div class="callout-body">
+          <p>This pattern requires that feature strings be <em>string literals</em>, Bun cannot evaluate computed strings at build time. The convention in this codebase is ALL_CAPS identifiers (e.g., <code>REACTIVE_COMPACT</code>, <code>COORDINATOR_MODE</code>, <code>KAIROS</code>).</p>
+        </div>
+      </div>
+
+      <h2 id="react-hooks-for-cli">Pattern 2: React Hooks for CLI State</h2>
+
+      <p>Using Ink (React for terminals) enables a surprising insight: all of React's hook patterns apply perfectly to CLI state management. The <code>hooks/</code> directory has 30+ custom hooks, each encapsulating a piece of interactive CLI behavior:</p>
+
+      <pre><code class="language-typescript">// hooks/useCanUseTool.tsx - encapsulates the permission prompt lifecycle
+export function useCanUseTool(
+  permissionContext: ToolPermissionContext,
+  setAppState: SetAppStateFn,
+): CanUseToolFn {
+  const pendingPermissions = useRef(new Map&lt;string, PermissionResolver&gt;())
+
+  // Returns a stable function that can be called from async tool code
+  return useCallback(async (tool, input, context, message, toolUseID) =&gt; {
+    const result = await evaluatePermission(tool, input, permissionContext)
+    if (result.behavior === 'ask') {
+      // Mount the permission dialog via state update
+      return new Promise(resolve =&gt; {
+        pendingPermissions.current.set(toolUseID, resolve)
+        setAppState(prev =&gt; ({
+          ...prev,
+          pendingPermissionRequest: { toolUseID, tool, input, message }
+        }))
+      })
+    }
+    return result
+  }, [permissionContext, setAppState])
+}
+
+// hooks/useCancelRequest.ts - wraps AbortController lifecycle
+export function useCancelRequest() {
+  const abortControllerRef = useRef(createAbortController())
+  const cancel = useCallback(() =&gt; {
+    abortControllerRef.current.abort()
+    abortControllerRef.current = createAbortController()
+  }, [])
+  return { signal: abortControllerRef.current.signal, cancel }
+}</code></pre>
+
+      <p>This approach means complex interactive behaviors, permission dialogs, progress spinners, interrupt handling, autocomplete, are each isolated in their own hook and composed together in the top-level screen components. Testing hooks independently is much simpler than testing a monolithic interactive loop.</p>
+
+      <h2 id="tool-abstraction">Pattern 3: The Tool Abstraction</h2>
+
+      <p>The <code>Tool&lt;Input, Output, Progress&gt;</code> interface is a masterclass in "everything a tool needs to be" captured in one place. It bundles:</p>
+
+      <ul>
+        <li>Input validation (Zod schema)</li>
+        <li>Business logic (<code>call()</code>)</li>
+        <li>Permission checking (<code>checkPermissions()</code>)</li>
+        <li>System prompt contribution (<code>prompt()</code>)</li>
+        <li>UI rendering (<code>renderToolUseMessage()</code>, <code>renderToolResultMessage()</code>)</li>
+        <li>Serialization for the API (<code>mapToolResultToToolResultBlockParam()</code>)</li>
+        <li>Security classification (<code>toAutoClassifierInput()</code>)</li>
+        <li>Behavior metadata (<code>isReadOnly</code>, <code>isConcurrencySafe</code>, <code>isDestructive</code>)</li>
+      </ul>
+
+      <p>Contrast this with a naive approach of having separate registries for each concern:</p>
+
+      <pre><code class="language-typescript">// Naive approach - separate registries (BAD)
+const toolSchemas = { 'FileEdit': fileEditSchema, ... }
+const toolHandlers = { 'FileEdit': handleFileEdit, ... }
+const toolRenderers = { 'FileEdit': renderFileEdit, ... }
+const toolPermissions = { 'FileEdit': checkFileEditPermissions, ... }
+
+// Problem: easy for registries to get out of sync, hard to discover
+// what all properties a tool should have, no type safety across concerns
+
+// Claude Code approach - single object (GOOD)
+export const FileEditTool = buildTool({
+  name: 'FileEdit',
+  inputSchema: z.object({ ... }),
+  async call(args, ctx) { ... },
+  async checkPermissions(args, ctx) { ... },
+  async prompt() { ... },
+  renderToolUseMessage(args) { ... },
+  mapToolResultToToolResultBlockParam(result, id) { ... },
+})</code></pre>
+
+      <h2 id="state-management-pattern">Pattern 4: Immutable State + Updater Pattern</h2>
+
+      <p>Rather than using Redux (too heavy) or Zustand (good but external), Claude Code implements its own minimal state management pattern that is surprisingly simple:</p>
+
+      <pre><code class="language-typescript">// state/AppStateStore.ts - the pattern
+type Updater&lt;S&gt; = (prev: S) =&gt; S
+
+class AppStateStore {
+  private state: AppState
+  private listeners = new Set&lt;(s: AppState) =&gt; void&gt;()
+
+  // Immutable update - always creates new state
+  set(updater: Updater&lt;AppState&gt;) {
+    this.state = updater(this.state)
+    this.listeners.forEach(l =&gt; l(this.state))
+  }
+
+  get() { return this.state }
+
+  subscribe(listener: (s: AppState) =&gt; void) {
+    this.listeners.add(listener)
+    return () =&gt; this.listeners.delete(listener)
+  }
+}
+
+// Usage in components
+function MyComponent({ setAppState }) {
+  // Always spread prev to preserve other state
+  const updateMode = (mode: PermissionMode) =&gt; {
+    setAppState(prev =&gt; ({ ...prev, permissionMode: mode }))
+  }
+}</code></pre>
+
+      <p>The key insight is that <code>setAppState</code> is an <em>updater function</em> rather than a direct setter, it receives the previous state and returns the new state. This prevents race conditions in concurrent tool execution and makes the state transitions auditable (each update is a pure function).</p>
+
+      <h2 id="lazy-circular-deps">Pattern 5: Lazy Requires for Circular Dependencies</h2>
+
+      <p>Large TypeScript codebases often develop circular imports. Claude Code handles this with a deliberate pattern: lazy <code>require()</code> calls at usage time instead of top-level <code>import</code>:</p>
+
+      <pre><code class="language-typescript">// main.tsx - lazy require to avoid circular dependency
+// Problem: teammate.ts → AppState.tsx → ... → main.tsx
+// Solution: don't import at module level, import when needed
+
+const getTeammateUtils = () =&gt;
+  require('./utils/teammate.js') as typeof import('./utils/teammate.js')
+
+// Usage:
+const { createTeammate } = getTeammateUtils()
+
+// Another example from QueryEngine.ts:
+// MessageSelector.tsx pulls React/ink - only needed at query time
+const messageSelector =
+  (): typeof import('src/components/MessageSelector.js') =&gt;
+    require('src/components/MessageSelector.js')</code></pre>
+
+      <p>The pattern uses a zero-arg factory function that returns the <code>require()</code> result. The <code>as typeof import()</code> cast provides full TypeScript types while keeping the import lazy. The module is cached by Node's/Bun's module system after the first call, so there is no repeated evaluation overhead.</p>
+
+      <div class="callout callout-info">
+        <span class="callout-icon"><i data-lucide="info"></i></span>
+        <div class="callout-body">
+          <p>The codebase has consistent ESLint annotations: <code>// eslint-disable @typescript-eslint/no-require-imports</code> before lazy require blocks and re-enable after, making it easy to audit all lazy imports with a simple grep.</p>
+        </div>
+      </div>
+
+      <h2 id="message-compaction-pattern">Pattern 6: Context-Window-Aware Message Management</h2>
+
+      <p>Building applications on top of LLMs requires treating the context window as a scarce resource. Claude Code's approach is instructive:</p>
+
+      <pre><code class="language-typescript">// The "token warning state" calculation (autoCompact.ts)
+type TokenWarningState =
+  | 'none'          // &lt; 80% of context window used
+  | 'warning'       // 80-95% used - show warning to user
+  | 'critical'      // &gt; 95% used - trigger auto-compact
+
+// The auto-compact check after each turn:
+const warningState = calculateTokenWarningState(usage, maxTokens)
+if (warningState === 'critical' && isAutoCompactEnabled()) {
+  await triggerAutoCompact(messages, context)
+}
+
+// Message normalization before API calls:
+// - Strip UI-only messages (never sent to API)
+// - Apply compact boundary (only post-boundary messages sent)
+// - Count tokens before sending to catch prompt-too-long errors
+// - Apply per-tool result size limits
+
+// The "tool result storage" pattern:
+// Tool results &gt; maxResultSizeChars are persisted to disk
+// Claude receives: "Result saved to /tmp/cc_result_abc123.txt (45,230 chars)"
+// This keeps the context window manageable for large outputs</code></pre>
+
+      <h2 id="progress-callback-pattern">Pattern 7: Progress Callbacks for Long Operations</h2>
+
+      <p>Tools that take a long time (subagent runs, large file operations) use a progress callback pattern to stream updates to the UI without blocking:</p>
+
+      <pre><code class="language-typescript">// Tool.ts - progress callback type
+type ToolCallProgress&lt;P extends ToolProgressData&gt; = (
+  progress: ToolProgress&lt;P&gt;,
+) =&gt; void
+
+// Example: AgentTool emits progress events as subagent streams
+export const AgentTool = buildTool({
+  async call(args, context, canUseTool, parentMessage, onProgress) {
+    for await (const event of subagent.run(args.prompt)) {
+      if (event.type === 'text') {
+        onProgress?.({
+          toolUseID: args.toolUseId,
+          data: { type: 'agent_progress', text: event.text }
+        })
+      }
+    }
+    return { data: finalResult }
+  },
+
+  renderToolUseProgressMessage(progressMessages, { verbose }) {
+    // Render accumulated progress messages as a live feed
+    return &lt;AgentProgressDisplay messages={progressMessages} /&gt;
+  },
+})</code></pre>
+
+      <p>The progress callback pattern decouples the tool's async logic from the UI rendering. The tool doesn't need to know anything about Ink or React, it just calls <code>onProgress()</code> with typed data, and the <code>renderToolUseProgressMessage()</code> method handles the presentation.</p>
+
+      <h2 id="async-prefetch-pattern">Pattern 8: Aggressive Startup Prefetching</h2>
+
+      <p>Claude Code prefetches everything that might be needed in the first few seconds, even before the user types anything. The pattern is consistent: fire I/O operations in parallel as early as possible, await their results only when needed.</p>
+
+      <pre><code class="language-typescript">// main.tsx - startup sequence (comments condensed)
+profileCheckpoint('main_tsx_entry')   // 1. Mark entry
+
+startMdmRawRead()         // 2. Fire MDM subprocess reads (parallel)
+startKeychainPrefetch()   // 3. Fire keychain reads (parallel)
+
+// ... ~135ms of imports evaluate ...
+
+async function main() {
+  // 4. Fire more parallel prefetches
+  const [
+    bootstrapData,      // GrowthBook flags, subscription status
+    policyLimits,       // Enterprise policy limits (MDM)
+    remoteManagedSettings,
+  ] = await Promise.all([
+    fetchBootstrapData(),
+    loadPolicyLimits(),
+    loadRemoteManagedSettings(),
+  ])
+
+  // 5. Start MCP connections in parallel
+  // (don't await - let them complete while user reads first prompt)
+  prefetchOfficialMcpUrls()
+  prefetchPassesEligibility()
+
+  // 6. By the time user presses Enter, keychain reads are done
+  await ensureKeychainPrefetchCompleted()
+}</code></pre>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon"><i data-lucide="lightbulb"></i></span>
+        <div class="callout-body">
+          <p>The startup profiler (<code>utils/startupProfiler.ts</code>) measures the time between checkpoints and logs it in debug mode. This helps identify regressions, if a new import adds 50ms to startup, the profiler catches it.</p>
+        </div>
+      </div>
+
+      <h2 id="discriminated-unions">Pattern 9: Exhaustive Discriminated Unions</h2>
+
+      <p>The codebase makes heavy use of TypeScript discriminated unions for all message types, permission results, and event types. This enables exhaustive switch statements that the TypeScript compiler verifies:</p>
+
+      <pre><code class="language-typescript">// types/message.ts
+type Message =
+  | { type: 'user';      role: 'user'; content: ContentBlockParam[] }
+  | { type: 'assistant'; role: 'assistant'; content: ContentBlock[] }
+  | { type: 'system';    subtype: SystemSubtype; ... }
+  | { type: 'progress';  data: ToolProgressData; ... }
+  | { type: 'tombstone'; originalId: string }
+
+// Exhaustive handling at every boundary:
+function processMessage(msg: Message) {
+  switch (msg.type) {
+    case 'user':      return handleUser(msg)
+    case 'assistant': return handleAssistant(msg)
+    case 'system':    return handleSystem(msg)
+    case 'progress':  return handleProgress(msg)
+    case 'tombstone': return null
+    // TypeScript error if a new case is added and not handled here
+  }
+}
+
+// normalizeMessagesForAPI uses type predicates to strip UI-only messages:
+function isAPIMessage(msg: Message): msg is UserMessage | AssistantMessage {
+  return msg.type === 'user' || msg.type === 'assistant'
+}</code></pre>
+
+      <h2 id="schema-first-design">Pattern 10: Schema-First Design with Zod</h2>
+
+      <p>Every tool input is defined as a Zod schema first, and TypeScript types are derived from it via <code>z.infer&lt;&gt;</code>. This means the runtime validation, TypeScript types, and JSON Schema for the API are all derived from a single source of truth:</p>
+
+      <pre><code class="language-typescript">// One schema, three uses:
+const BashInputSchema = z.object({
+  command: z.string().describe('The bash command to execute'),
+  timeout: z.number().optional().describe('Timeout in milliseconds'),
+  restart: z.boolean().optional().describe('Restart the shell session'),
+})
+
+// 1. TypeScript type (zero runtime cost)
+type BashInput = z.infer&lt;typeof BashInputSchema&gt;
+
+// 2. Runtime validation in tool dispatch
+const parsed = BashInputSchema.safeParse(rawInput)
+if (!parsed.success) {
+  return errorResult(parsed.error.message)
+}
+
+// 3. JSON Schema for the Anthropic API (auto-generated by Zod)
+const jsonSchema = zodToJsonSchema(BashInputSchema)</code></pre>
+
+      <p>Zod v4 (used here) is significantly faster than v3 for schema evaluation, important when validating tool inputs on every single tool call in a long session.</p>
+
+      <section class="faq-section" id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details class="faq-item">
+          <summary>What is the recommended way to edit files?</summary>
+          <div class="faq-content">It is highly recommended to use the targeted <code>FileEditTool</code> rather than relying on standard sed commands or asking the agent to rewrite entire files. This prevents context exhaustion and mistakes.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How should I write a CLAUDE.md file?</summary>
+          <div class="faq-content">Provide brief, high-signal project overview, conventions, and constraints. Do not put overly generic coding advice inside it; treat it as the DNA of your repository.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Should I keep the agent task running indefinitely?</summary>
+          <div class="faq-content">No, use `/compact` or start fresh sessions regularly to reset context overhead, keep inference fast, and dramatically reduce API block costs.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How can I debug agent loops?</summary>
+          <div class="faq-content">Pay attention to the tool executions and use the verbose mode if available to see exactly what prompts are being serialized to the runtime API.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What is the best way to utilize skills?</summary>
+          <div class="faq-content">Encode heavily repeated multi-step tasks into explicit skills rather than typing out the same verbose manual instructions every single session.</div>
+        </details>
+      </section>
+
+    </main>
+
+    <nav class="toc" aria-label="On this page">
+      <div class="toc-title">On This Page</div>
+      <ul class="toc-list" id="toc-list"></ul>
+    </nav>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  });
+</script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

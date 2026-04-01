@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tools System | Learn from Claude Leaked Code</title>
+  <meta name="description" content="Deep dive into how Claude Code's tool system works: the Tool interface, dispatch mechanism, all built-in tools, and the design decisions behind each one." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">CC</div>
+      <span class="logo-text">Learn from Claude <span>Leaked Code</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+      <button class="btn-icon hamburger" id="hamburger" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle dark mode">
+        <span id="theme-icon">
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" style="display:none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span class="nav-icon"><i data-lucide="book-open"></i></span> Introduction</a>
+        <a href="architecture.html"><span class="nav-icon"><i data-lucide="layers"></i></span> Architecture</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Systems</div>
+      <nav class="sidebar-nav">
+        <a href="query-engine.html"><span class="nav-icon"><i data-lucide="zap"></i></span> Query Engine</a>
+        <a href="tools.html" class="active"><span class="nav-icon"><i data-lucide="wrench"></i></span> Tools System</a>
+        <a href="security.html"><span class="nav-icon"><i data-lucide="shield"></i></span> Security &amp; Permissions</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Advanced</div>
+      <nav class="sidebar-nav">
+        <a href="best-practices.html"><span class="nav-icon"><i data-lucide="star"></i></span> Best Practices</a>
+        <a href="mcp-skills.html"><span class="nav-icon"><i data-lucide="plug"></i></span> MCP &amp; Skills</a>
+        <a href="interpret.html"><span class="nav-icon"><i data-lucide="compass"></i></span> Navigate the Source</a>
+      </nav>
+    </div>
+    <div class="sidebar-download">
+      <a href="https://github.com/Shreyan1/claude-code-src-leaked" target="_blank" rel="noopener" class="download-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.66-.17.61-.19 1.25-.05 1.87L9 22"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        View Full Leaked Code
+      </a>
+      <p class="download-note">On GitHub &middot; Shreyan1/claude-code-src-leaked</p>
+      <a href="https://www.linkedin.com/in/shreyanbasuray/" target="_blank" rel="noopener" class="linkedin-follow-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Follow on LinkedIn
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="content-wrapper">
+    <main class="page-content">
+
+      <div class="breadcrumb">
+        <a href="index.html">Learn from Claude Leaked Code</a>
+        <span class="sep">/</span>
+        <span>Tools System</span>
+      </div>
+
+      <span class="section-tag">Core System</span>
+      <h1>The Tools System: Teaching Claude How to Touch the World</h1>
+      <p class="page-intro">If the query engine is Claude Code's brain, tools are its hands. An LLM on its own is just a text generator confined to a vacuum. To interact with your file system, run scripts, or connect to the internet, it needs tools. Let's dive into exactly how Anthropic engineered an incredibly robust, deeply typed, and dynamically loaded tool ecosystem for Claude.</p>
+
+      <h2 id="tool-interface">The Root: <code>Tool.ts</code> Interface</h2>
+
+      <p>If you have ever built a simple GPT wrapper, you might have just defined tools as a massive JSON array of schemas. Anthropic took a much more sophisticated, object-oriented approach. In <code>claude-code-src/Tool.ts</code>, every single tool implements a generic interface: <code>Tool&lt;Input, Output, Progress&gt;</code>.</p>
+
+      <p>Why this complexity? Because in a terminal application, a tool is not just a schema. It needs to know how to validate inputs, check user permissions before doing something dangerous, render progress spinners using React (Ink), and serialize its output cleanly back to the API. Tying all these concerns perfectly into one single object eliminates an enormous amount of boilerplate and hard-to-track UI bugs.</p>
+
+      <pre><code class="language-typescript">// Tool.ts  - The architecture of a tool (from the actual source)
+export type Tool&lt;
+  Input extends AnyObject = AnyObject,
+  Output = unknown,
+  P extends ToolProgressData = ToolProgressData,
+&gt; = {
+  readonly name: string
+  readonly inputSchema: Input
+
+  // The actual action takes place here:
+  call(args, context, canUseTool, parentMessage, onProgress?): Promise&lt;ToolResult&lt;Output&gt;&gt;
+
+  // Crucial Security Flags:
+  isConcurrencySafe(input): boolean   // Can multiple instances run at once?
+  isReadOnly(input): boolean          // Does it change anything on disk?
+  isDestructive?(input): boolean      // Could it cause irreversible damage?
+  
+  // Terminal React UI (Ink):
+  renderToolUseMessage(input, options): React.ReactNode
+  renderToolResultMessage?(output, progressMessages, options): React.ReactNode
+
+  // Memory bounds:
+  maxResultSizeChars: number          // When to spill output to a tmp file
+  readonly shouldDefer?: boolean      // Hide from initial prompt to save tokens
+}</code></pre>
+
+      <div class="callout callout-info">
+        <span class="callout-icon"><i data-lucide="info"></i></span>
+        <div class="callout-body">
+          <p><strong>Why does every tool have render methods?</strong> Claude Code is not a web app. Its UI runs entirely inside your terminal using <a href="https://github.com/vadimdemedes/ink" target="_blank">Ink</a> (React for CLIs). When Claude calls <code>BashTool</code>, you see a nicely formatted command block with a spinner. That spinner, the progress bar, the diff preview for file edits: all of it is rendered by the tool's own <code>renderToolUseMessage</code> and <code>renderToolResultMessage</code> methods. The tool owns its entire visual lifecycle.</p>
+        </div>
+      </div>
+
+      <h3 id="build-tool">The Safety Net: <code>buildTool()</code> Factory</h3>
+
+      <p>When you have dozens of tools, forgetting to implement a security check in just one of them can be disastrous. Imagine shipping a tool that accidentally defaults to "no permission needed" and lets Claude run destructive commands silently. To prevent this, Anthropic routes every single tool through the <code>buildTool()</code> factory function.</p>
+
+      <p>If a developer creates a new tool but forgets to specify whether it writes to disk, <code>buildTool</code> steps in and applies <strong>fail-closed defaults</strong>. It assumes the tool is NOT concurrency safe and NOT read-only, which means the permission system will automatically flag it and force user approval. You have to explicitly opt out of safety checks, not opt into them. That is a brilliant design decision.</p>
+
+      <pre><code class="language-typescript">// These are the actual defaults from Tool.ts (line 757)
+const TOOL_DEFAULTS = {
+  isEnabled:          () =&gt; true,
+  isConcurrencySafe:  (_input?) =&gt; false,   // Assume NOT safe (fail-closed)
+  isReadOnly:         (_input?) =&gt; false,   // Assume it writes (fail-closed)
+  isDestructive:      (_input?) =&gt; false,
+  checkPermissions:   (input, _ctx?) =&gt;
+    Promise.resolve({ behavior: 'allow', updatedInput: input }),
+  toAutoClassifierInput: (_input?) =&gt; '',   // Skip classifier for most tools
+  userFacingName:     (_input?) =&gt; '',
+}
+
+// Every tool in the codebase uses this pattern:
+export const GrepTool = buildTool({
+  name: 'Grep',
+  inputSchema: z.object({ pattern: z.string(), path: z.string() }),
+  maxResultSizeChars: 50_000,
+  isReadOnly: () =&gt; true,           // Override: grep is safe
+  isConcurrencySafe: () =&gt; true,    // Override: multiple greps are fine
+  async call(args) { /* ... */ },
+  renderToolUseMessage(input) { /* ... */ },
+})</code></pre>
+
+      <h2 id="tool-registry">The Roster: How <code>tools.ts</code> Assembles Everything</h2>
+
+      <p>All 40+ tool implementations live in their own directories under <code>tools/</code>. The file <code>tools.ts</code> is the central registry that pulls them all together into a single ordered list. But it is far from a simple import-and-export. This file contains some of the most interesting engineering decisions in the entire codebase.</p>
+
+      <h3 id="dead-code-elimination">Dead-Code Elimination with Feature Flags</h3>
+
+      <p>Not every tool ships in every build. Anthropic uses Bun's compile-time <code>feature()</code> macro to strip entire tools from the final binary. If a feature flag is off, the tool's code literally does not exist in the compiled output. Zero bytes. Zero overhead.</p>
+
+      <pre><code class="language-typescript">// tools.ts - conditional tool loading (from the actual source)
+import { feature } from 'bun:bundle'
+
+// These tools only exist when their feature flag is enabled at BUILD time:
+const SleepTool = feature('PROACTIVE') || feature('KAIROS')
+    ? require('./tools/SleepTool/SleepTool.js').SleepTool
+    : null
+
+const cronTools = feature('AGENT_TRIGGERS')
+  ? [
+      require('./tools/ScheduleCronTool/CronCreateTool.js').CronCreateTool,
+      require('./tools/ScheduleCronTool/CronDeleteTool.js').CronDeleteTool,
+      require('./tools/ScheduleCronTool/CronListTool.js').CronListTool,
+    ]
+  : []
+
+// Internal-only tools gated by environment variable:
+const REPLTool = process.env.USER_TYPE === 'ant'
+    ? require('./tools/REPLTool/REPLTool.js').REPLTool
+    : null</code></pre>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon"><i data-lucide="lightbulb"></i></span>
+        <div class="callout-body">
+          <p><strong>Takeaway for your own projects:</strong> If you maintain a product with internal-only features or experimental capabilities, compile-time dead-code elimination is far more secure than runtime checks. A runtime <code>if</code> statement can be patched out by a determined user. Code that was never compiled into the binary simply cannot be accessed.</p>
+        </div>
+      </div>
+
+      <h3 id="tool-ordering">Why Tool Order Matters</h3>
+
+      <p>The order of tools in the <code>getAllBaseTools()</code> array is not random. It directly affects the system prompt sent to the Claude API. Tools listed first appear more prominently in the prompt, which means Claude is statistically more likely to reach for them. That is why <code>AgentTool</code>, <code>BashTool</code>, <code>FileReadTool</code>, and <code>FileEditTool</code> are always at the top of the list.</p>
+
+      <pre><code class="language-typescript">// tools.ts - the master tool list (simplified from source)
+export function getAllBaseTools(): Tools {
+  return [
+    AgentTool,          // First: orchestrate subtasks
+    TaskOutputTool,     // Monitor background work
+    BashTool,           // Execute shell commands
+    GlobTool, GrepTool, // Search and discover
+    FileReadTool,       // Read files
+    FileEditTool,       // Surgical edits
+    FileWriteTool,      // Create new files
+    // ... 30+ more tools, ordered by importance
+    BriefTool,          // Last: session handoff (rarely needed)
+  ]
+}</code></pre>
+
+      <h2 id="deferred-tools">Token Budgeting: Deferred Tools</h2>
+
+      <p>Claude Code ships with over 46 built-in tools. Sending all 46 API schemas in the system prompt for every single conversation turn would consume thousands of tokens and drastically increase API costs and latency. To solve this, Anthropic implemented <strong>Deferred Tools</strong>.</p>
+
+      <p>By defining <code>readonly shouldDefer: true</code>, a tool is temporarily hidden from Claude's initial prompt. The model only knows about the core <code>alwaysLoad</code> tools directly (like Bash, File Edit, File Read). If Claude encounters a task needing a niche tool (like creating a Scheduled Cron job), it first calls the <code>ToolSearchTool</code> with a keyword query. The system returns the hidden schema, and <em>then</em> Claude can use it.</p>
+
+      <p>Each deferred tool includes a <code>searchHint</code> property (a short phrase like "create recurring cron scheduled agent task") that the ToolSearch algorithm matches against. Think of it as the tool advertising its capabilities to an internal search engine.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon"><i data-lucide="alert-triangle"></i></span>
+        <div class="callout-body">
+          <p><strong>Design lesson:</strong> If you are building LLM applications with more than 10-15 tools, implement a tool-search discovery mechanism like this. It keeps your system prompt slim, reduces token costs, and paradoxically improves tool selection accuracy because the model is not overwhelmed by irrelevant options.</p>
+        </div>
+      </div>
+
+      <h2 id="tool-result-storage">Managing Memory: <code>maxResultSizeChars</code></h2>
+
+      <p>What happens if Claude asks to run <code>ls -laR /</code> and the bash tool outputs 50 megabytes of text? Feeding that back into the LLM context window would instantly blow up the token limit and crash the session.</p>
+
+      <p>Anthropic enforces a strict maximum cap via the <code>maxResultSizeChars</code> property on every tool. If a tool's output string exceeds this limit, the system gracefully traps the output, saves it to a temporary file on the user's disk, and instead returns a compressed summary to Claude: <em>"Output was too large. I saved the full result to /tmp/claude-xyz.txt. You can read specific sections with FileReadTool."</em></p>
+
+      <p>The one exception is <code>FileReadTool</code> itself, which sets <code>maxResultSizeChars: Infinity</code>. Think about why: if a file read produces output that gets persisted to another file, Claude would need to use FileReadTool to read <em>that</em> file, which could again be too large, creating an infinite loop. So FileReadTool manages its own output size internally with line-range parameters.</p>
+
+      <h2 id="all-tools">The Full Tool Catalog</h2>
+
+      <p>Here is a breakdown of every tool category in the codebase, with explanations of why each tool exists and how it fits into the larger architecture.</p>
+
+      <h3 id="filesystem-tools">Filesystem Tools</h3>
+      <p>The bread and butter for any coding agent. These let Claude navigate and manipulate your repository.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>What it does and why it matters</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tool-name">FileReadTool</td><td>Reads file contents with optional line ranges. Handles images, PDFs, and binary files automatically. Sets <code>maxResultSizeChars: Infinity</code> to avoid the circular persist-to-file problem described above.</td></tr>
+            <tr><td class="tool-name">FileEditTool</td><td>The surgical knife. Instead of replacing an entire file (which is slow and token-expensive), it uses precise string-match replacement to patch specific sections. Shows a diff preview in the terminal before applying.</td></tr>
+            <tr><td class="tool-name">FileWriteTool</td><td>Creates new files or completely overwrites existing ones. The permission system enforces that Claude must <em>read</em> a file before overwriting it, preventing accidental data loss.</td></tr>
+            <tr><td class="tool-name">GlobTool</td><td>Fast file-path matching. Returns results sorted by modification time, feeding the model the most recently touched (and therefore most relevant) files first.</td></tr>
+            <tr><td class="tool-name">GrepTool</td><td>Regex search across file contents using ripgrep under the hood. The backbone of code discovery: Claude uses this to find function definitions and variable usages before editing.</td></tr>
+            <tr><td class="tool-name">LSPTool</td><td>Language Server Protocol integration: hover info, go-to-definition, find-references. Gives Claude IDE-level understanding of your code's type system.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="execution-tools">Execution Tools</h3>
+      <p>When the model writes code, it needs to test it. This is what sets Claude Code apart from basic web-based chatbots.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>What it does and why it matters</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tool-name">BashTool</td><td>Spawns a persistent shell session (PTY), so environment variables and working directories persist across calls. Features strict execution timeouts to prevent infinite loops, and integrates with the security classifier to flag dangerous commands before they run.</td></tr>
+            <tr><td class="tool-name">PowerShellTool</td><td>The Windows equivalent. Mirrors BashTool's API but targets PowerShell. Only loaded when running on Windows (dead-code eliminated on other platforms).</td></tr>
+            <tr><td class="tool-name">NotebookEditTool</td><td>Edits Jupyter Notebook cells without corrupting the underlying JSON structure. Supports adding, modifying, and deleting cells while preserving execution outputs.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="agent-tools">Agent &amp; Task Tools</h3>
+      <p>This is where Claude Code gets truly powerful: the ability to spawn copies of itself for parallel work.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>What it does and why it matters</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tool-name">AgentTool</td><td>Spawns a child agent with its own isolated tool context and message history. The parent agent can run multiple subagents concurrently, breaking massive refactors into digestible, parallel chunks.</td></tr>
+            <tr><td class="tool-name">TaskCreateTool</td><td>Creates background tasks (long-running subagents) that execute independently. Returns a Task ID so the main thread can poll progress asynchronously, just like async programming patterns.</td></tr>
+            <tr><td class="tool-name">TaskGetTool</td><td>Retrieves the status and output of a background task by its ID. Read-only.</td></tr>
+            <tr><td class="tool-name">TaskStopTool</td><td>Terminates a running background task. Think of it as <code>kill</code> for agent processes.</td></tr>
+            <tr><td class="tool-name">SendMessageTool</td><td>Sends a message to another agent in a swarm/team configuration. Enables multi-agent collaboration on complex problems.</td></tr>
+            <tr><td class="tool-name">TeamCreateTool</td><td>Creates a team of coordinated agents. Only available when the <code>AGENT_SWARMS</code> feature is enabled.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="web-tools">Web &amp; Network Tools</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>What it does and why it matters</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tool-name">WebFetchTool</td><td>Fetches web pages and converts HTML to clean markdown for Claude to consume. Handles redirects, authentication, and even PDF rendering.</td></tr>
+            <tr><td class="tool-name">WebSearchTool</td><td>Performs web searches and returns ranked results with snippets. Backed by search APIs. Read-only.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="mcp-tools">MCP &amp; Integration Tools</h3>
+      <p>Anthropic knew they could not build every tool imaginable. Instead of a messy plugin system, they implemented the <strong>Model Context Protocol (MCP)</strong> as the universal extension mechanism.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>What it does and why it matters</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tool-name">MCPTool</td><td>A dynamic proxy. At runtime, it constructs a full Tool interface for any external server that speaks MCP. Claude Code can instantly "learn" to use your Postgres database or Stripe API without Anthropic changing a single line of core code.</td></tr>
+            <tr><td class="tool-name">McpAuthTool</td><td>Handles mid-session authentication flows (OAuth redirects, token exchange) when an MCP server requires credentials.</td></tr>
+            <tr><td class="tool-name">ListMcpResourcesTool</td><td>Enumerates available resources from connected MCP servers so Claude knows what data sources are accessible.</td></tr>
+            <tr><td class="tool-name">ReadMcpResourceTool</td><td>Reads a specific resource from an MCP server by URI.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="utility-tools">Utility &amp; Meta Tools</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>What it does and why it matters</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tool-name">ToolSearchTool</td><td>The discovery engine for deferred tools. Claude searches by keyword, and the system returns matching tool schemas on demand.</td></tr>
+            <tr><td class="tool-name">SkillTool</td><td>Executes a "skill" (a bundled script or slash-command workflow) programmatically from within a tool call.</td></tr>
+            <tr><td class="tool-name">TodoWriteTool</td><td>Manages a live todo list in the REPL sidebar. Interestingly, it renders <em>nothing</em> in the chat transcript because its output goes to the sidebar panel instead.</td></tr>
+            <tr><td class="tool-name">AskUserQuestionTool</td><td>Pauses execution to ask the user a clarifying question and wait for a response. Only works in interactive mode.</td></tr>
+            <tr><td class="tool-name">BriefTool</td><td>Creates a compressed summary of the current session for handoff to another agent. Think of it as "context serialization" for agent-to-agent communication.</td></tr>
+            <tr><td class="tool-name">EnterPlanModeTool</td><td>Switches Claude into "plan mode" where every tool call requires explicit user approval. The model can enter this mode voluntarily when it detects a high-risk situation.</td></tr>
+            <tr><td class="tool-name">ConfigTool</td><td>Reads and writes Claude Code configuration (user settings, project settings). Only available in internal builds.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="binary-detection">Source Deep Dive: <code>files.ts</code> — Binary File Detection</h2>
+
+      <p>Before any filesystem tool reads a file, Claude Code needs to know whether it's text or binary. Feeding raw binary data to an LLM as if it were source code wastes tokens and produces garbled output. The logic lives in <code>src/utils/files.ts</code>, which exports a two-stage detection system: a fast extension blocklist and a content-heuristic fallback.</p>
+
+      <h3 id="binary-extension-list">Stage 1: The Extension Blocklist</h3>
+
+      <p><code>BINARY_EXTENSIONS</code> is a JavaScript <code>Set</code> containing roughly 80 file extensions across every category of binary content. It's organized by type, giving a clear picture of what Claude Code considers "untouchable as text":</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Extensions included</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Images</td><td>.png, .jpg, .jpeg, .gif, .bmp, .ico, .webp, .tiff, .tif</td></tr>
+            <tr><td>Video</td><td>.mp4, .mov, .avi, .mkv, .webm, .wmv, .flv, .m4v, .mpeg, .mpg</td></tr>
+            <tr><td>Audio</td><td>.mp3, .wav, .ogg, .flac, .aac, .m4a, .wma, .aiff, .opus</td></tr>
+            <tr><td>Archives</td><td>.zip, .tar, .gz, .bz2, .7z, .rar, .xz, .z, .tgz, .iso</td></tr>
+            <tr><td>Executables</td><td>.exe, .dll, .so, .dylib, .bin, .o, .a, .obj, .lib, .app, .msi, .deb, .rpm</td></tr>
+            <tr><td>Documents</td><td>.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .odt, .ods, .odp</td></tr>
+            <tr><td>Fonts</td><td>.ttf, .otf, .woff, .woff2, .eot</td></tr>
+            <tr><td>Bytecode / VM</td><td>.pyc, .pyo, .class, .jar, .war, .ear, .node, .wasm, .rlib</td></tr>
+            <tr><td>Databases</td><td>.sqlite, .sqlite3, .db, .mdb, .idx</td></tr>
+            <tr><td>Design / 3D</td><td>.psd, .ai, .eps, .sketch, .fig, .xd, .blend, .3ds, .max</td></tr>
+            <tr><td>Flash</td><td>.swf, .fla</td></tr>
+            <tr><td>Lock / profiling</td><td>.lockb, .dat, .data</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The lookup function is a one-liner:</p>
+
+      <pre><code class="language-typescript">export function hasBinaryExtension(filePath: string): boolean {
+  const ext = filePath.slice(filePath.lastIndexOf('.')).toLowerCase()
+  return BINARY_EXTENSIONS.has(ext)
+}</code></pre>
+
+      <p>This runs in O(1) time because it's a Set lookup, making the extension check essentially free on every file open. Notice that <strong><code>.pdf</code> is included in the binary list</strong>, which would seem to prevent Claude from reading PDFs. The source comment explains the exception: "<em>PDF is here; FileReadTool excludes it at the call site</em>." <code>FileReadTool</code> has special-cased PDF to invoke a PDF extraction pipeline rather than raw file reading, so the extension check is bypassed for PDFs specifically.</p>
+
+      <h3 id="binary-content-heuristic">Stage 2: The Content Heuristic</h3>
+
+      <p>Extension matching isn't enough — files can be misnamed, and new binary formats appear regularly. The second check, <code>isBinaryContent()</code>, inspects the actual file bytes:</p>
+
+      <pre><code class="language-typescript">const BINARY_CHECK_SIZE = 8192  // Only check first 8KB
+
+export function isBinaryContent(buffer: Buffer): boolean {
+  const checkSize = Math.min(buffer.length, BINARY_CHECK_SIZE)
+
+  let nonPrintable = 0
+  for (let i = 0; i &lt; checkSize; i++) {
+    const byte = buffer[i]!
+
+    // Null byte is a strong indicator of binary
+    if (byte === 0) {
+      return true  // Early exit: single null byte = binary
+    }
+
+    // Count non-printable, non-whitespace bytes
+    // Printable ASCII is 32-126, plus tab(9), newline(10), CR(13)
+    if (byte &lt; 32 && byte !== 9 && byte !== 10 && byte !== 13) {
+      nonPrintable++
+    }
+  }
+
+  // If more than 10% non-printable, likely binary
+  return nonPrintable / checkSize &gt; 0.1
+}</code></pre>
+
+      <p>The heuristic has two tiers. The first is an <strong>immediate early exit</strong>: a single null byte (<code>\0</code>) anywhere in the first 8 KB is treated as a definitive binary indicator. Nearly all binary formats (ELF executables, PE headers, compiled JARs, ZIP archives) have null bytes in their headers, while valid UTF-8 text essentially never does. The second tier counts all bytes below ASCII 32 that aren't standard whitespace (tab, newline, carriage return) — if more than 10% of the sampled bytes are non-printable, the file is classified as binary.</p>
+
+      <div class="callout callout-info">
+        <span class="callout-icon"><i data-lucide="info"></i></span>
+        <div class="callout-body">
+          <p><strong>Why only 8 KB?</strong> Reading the full file just to determine if it's readable would be expensive for large files. The 8 KB sample is a well-established heuristic: if a file is text, its first 8 KB will reflect that reliably. Tools like <code>git</code>, <code>file</code>, and most IDEs use a similar approach. The cost is a small false-negative rate for pathological cases (e.g., a text file with binary headers), which is acceptable given how rarely it occurs.</p>
+        </div>
+      </div>
+
+      <h3 id="binary-detection-callsite">Where Binary Detection Runs</h3>
+
+      <p>These two functions are called in sequence in <code>FileReadTool</code> before any file content is returned to the model. If <code>hasBinaryExtension()</code> returns true (and the file isn't PDF), the tool returns an informative error message like <em>"This file has a binary extension and cannot be read as text."</em> If the extension passes but <code>isBinaryContent()</code> returns true on the first 8 KB, the same error is returned. The model never sees the raw bytes, preventing both garbage output and context window contamination from binary data.</p>
+
+      <h2 id="permission-model">The Safety Protocol</h2>
+
+      <p>Of course, arming an AI with <code>BashTool</code> without safeguards would be reckless. Every single <code>tool.call()</code> invocation passes through a multi-layered permissions interceptor before anything actually executes.</p>
+
+      <div class="flow">
+        <div class="flow-item"><code>validateInput()</code></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-item"><code>checkPermissions()</code></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-item">Permission Rules</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-item">User Dialog</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-item"><code>tool.call()</code></div>
+      </div>
+
+      <p>First, <code>validateInput()</code> checks that the arguments are structurally valid. Then <code>checkPermissions()</code> runs tool-specific security logic. The result is one of three outcomes:</p>
+
+      <ul>
+        <li><strong><code>{ behavior: 'allow' }</code></strong> - Proceed immediately. Used for read-only tools like GrepTool.</li>
+        <li><strong><code>{ behavior: 'ask' }</code></strong> - Freeze execution and show a permission dialog in the terminal. The model waits until you explicitly approve.</li>
+        <li><strong><code>{ behavior: 'deny' }</code></strong> - Reject the tool call entirely and tell Claude why it was denied.</li>
+      </ul>
+
+      <p>Tools that declare <code>isDestructive: () =&gt; true</code> trigger an even more prominent confirmation dialog. This is how Claude Code ensures you always stay in control, even when the agent is running autonomously.</p>
+
+      <p>For a complete deep dive into the permission modes (Interactive, Auto, Bypass) and the security classifier, see the <a href="security.html">Security &amp; Permissions</a> page.</p>
+
+      <section class="faq-section" id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details class="faq-item">
+          <summary>How do I add my own tool?</summary>
+          <div class="faq-content">You can build a class implementing the abstract Tool interface, define a zod schema for arguments, and register it in the central tool registry.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Are bash commands executed natively or safely?</summary>
+          <div class="faq-content">BashTool executes commands natively, which is why the permission system acts as a crucial checkpoint before potentially dangerous executions.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How does the WebFetchTool work?</summary>
+          <div class="faq-content">It scrapes specific URLs, extracts the core content usually converting to markdown, and allows Claude to natively read and interpret remote documentation.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Why are there so many tools built-in?</summary>
+          <div class="faq-content">Having over 40 specialised tools like FileEdit, Bash, WebFetch, and MCP prevents the model from relying on slow, error-prone generic bash scripts to perform complex multi-step actions.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can tools yield partial results?</summary>
+          <div class="faq-content">Yes, tools can yield ProgressMessages which render real-time UI feedback to the terminal before the tool action fully resolves.</div>
+        </details>
+      </section>
+
+    </main>
+
+    <nav class="toc" aria-label="On this page">
+      <div class="toc-title">On This Page</div>
+      <ul class="toc-list" id="toc-list"></ul>
+    </nav>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  });
+</script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

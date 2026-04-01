@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security &amp; Permissions | Learn from Claude Leaked Code</title>
+  <meta name="description" content="Claude Code's permission system, canUseTool(), bypass modes, bridge security model, API key handling, and input sanitization." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">CC</div>
+      <span class="logo-text">Learn from Claude <span>Leaked Code</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+      <button class="btn-icon hamburger" id="hamburger" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle dark mode">
+        <span id="theme-icon">
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" style="display:none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span class="nav-icon"><i data-lucide="book-open"></i></span> Introduction</a>
+        <a href="architecture.html"><span class="nav-icon"><i data-lucide="layers"></i></span> Architecture</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Systems</div>
+      <nav class="sidebar-nav">
+        <a href="query-engine.html"><span class="nav-icon"><i data-lucide="zap"></i></span> Query Engine</a>
+        <a href="tools.html"><span class="nav-icon"><i data-lucide="wrench"></i></span> Tools System</a>
+        <a href="security.html" class="active"><span class="nav-icon"><i data-lucide="shield"></i></span> Security &amp; Permissions</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Advanced</div>
+      <nav class="sidebar-nav">
+        <a href="best-practices.html"><span class="nav-icon"><i data-lucide="star"></i></span> Best Practices</a>
+        <a href="mcp-skills.html"><span class="nav-icon"><i data-lucide="plug"></i></span> MCP &amp; Skills</a>
+        <a href="interpret.html"><span class="nav-icon"><i data-lucide="compass"></i></span> Navigate the Source</a>
+      </nav>
+    </div>
+    <div class="sidebar-download">
+      <a href="https://github.com/Shreyan1/claude-code-src-leaked" target="_blank" rel="noopener" class="download-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.66-.17.61-.19 1.25-.05 1.87L9 22"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        View Full Leaked Code
+      </a>
+      <p class="download-note">On GitHub &middot; Shreyan1/claude-code-src-leaked</p>
+      <a href="https://www.linkedin.com/in/shreyanbasuray/" target="_blank" rel="noopener" class="linkedin-follow-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Follow on LinkedIn
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="content-wrapper">
+    <main class="page-content">
+
+      <div class="breadcrumb">
+        <a href="index.html">Learn from Claude Leaked Code</a>
+        <span class="sep">/</span>
+        <span>Security &amp; Permissions</span>
+      </div>
+
+      <span class="section-tag">Security</span>
+      <h1>Security &amp; Permissions</h1>
+      <p class="page-intro">Claude Code handles sensitive operations: executing shell commands, reading credentials, writing to the filesystem. The permission system is a core safety layer that controls what Claude can do, when it needs user approval, and what is always forbidden.</p>
+
+      <h2 id="permission-architecture">Permission System Architecture</h2>
+
+      <p>The permission system is defined in <code>types/permissions.ts</code> and implemented across several files in <code>utils/permissions/</code>. It uses a layered model where permissions can be set at multiple scopes:</p>
+
+      <div class="mindmap-wrap">
+  <svg style="max-width: 640px;" viewBox="0 0 640 460" xmlns="http://www.w3.org/2000/svg" class="mindmap-svg" role="img" aria-label="Permission evaluation order">
+    <defs>
+      <marker id="ahp2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5 Z" fill="#d97757"/></marker>
+    </defs>
+
+    <text x="320" y="18" fill="#6b7280" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" letter-spacing="0.06em">FIRST MATCHING RULE WINS</text>
+
+    <!-- Step items: y positions -->
+    <!-- 1: Safety checks -->
+    <rect x="60" y="28" width="520" height="46" rx="8" fill="#1a0f16" stroke="#d97757" stroke-width="1.8"/>
+    <text x="96" y="47" fill="#d97757" font-family="Inter,sans-serif" font-size="10" font-weight="700" letter-spacing="0.06em">1 · SAFETY CHECKS</text>
+    <text x="96" y="65" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10.5">Always run · non-overridable · Windows paths · .claude/ write attempts · cross-machine forgery</text>
+    <text x="60" y="55" fill="#d97757" font-family="Inter,sans-serif" font-size="11" font-weight="700" text-anchor="middle" transform="translate(0,0)">&#x1F6AB;</text>
+
+    <line x1="320" y1="74" x2="320" y2="86" stroke="#4a5568" stroke-width="1.2" marker-end="url(#ahp2)"/>
+
+    <!-- 2: alwaysDenyRules -->
+    <rect x="60" y="89" width="520" height="40" rx="8" fill="#1a150e" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="96" y="108" fill="#fde68a" font-family="Inter,sans-serif" font-size="10" font-weight="700" letter-spacing="0.06em">2 · alwaysDenyRules</text>
+    <text x="96" y="122" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10.5">From user / project / policy settings · if any deny rule matches → reject immediately</text>
+
+    <line x1="320" y1="129" x2="320" y2="141" stroke="#4a5568" stroke-width="1.2" marker-end="url(#ahp2)"/>
+
+    <!-- 3: Policy limits -->
+    <rect x="60" y="144" width="520" height="40" rx="8" fill="#1a150e" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="96" y="163" fill="#fde68a" font-family="Inter,sans-serif" font-size="10" font-weight="700" letter-spacing="0.06em">3 · POLICY LIMITS</text>
+    <text x="96" y="177" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10.5">MDM-administered enterprise rules · managed settings override user rules</text>
+
+    <line x1="320" y1="184" x2="320" y2="196" stroke="#4a5568" stroke-width="1.2" marker-end="url(#ahp2)"/>
+
+    <!-- 4: alwaysAllowRules -->
+    <rect x="60" y="199" width="520" height="40" rx="8" fill="#0e2620" stroke="#10b981" stroke-width="1.5"/>
+    <text x="96" y="218" fill="#6ee7b7" font-family="Inter,sans-serif" font-size="10" font-weight="700" letter-spacing="0.06em">4 · alwaysAllowRules</text>
+    <text x="96" y="232" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10.5">From user / project settings · if any allow rule matches → permit immediately</text>
+
+    <line x1="320" y1="239" x2="320" y2="251" stroke="#4a5568" stroke-width="1.2" marker-end="url(#ahp2)"/>
+
+    <!-- 5: Permission mode -->
+    <rect x="60" y="254" width="520" height="52" rx="8" fill="#1a1040" stroke="#8b5cf6" stroke-width="1.5"/>
+    <text x="96" y="273" fill="#a78bfa" font-family="Inter,sans-serif" font-size="10" font-weight="700" letter-spacing="0.06em">5 · PERMISSION MODE</text>
+    <text x="96" y="289" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10.5">Session-wide: default · acceptEdits · plan · bypassPermissions · auto · dontAsk · bubble</text>
+    <text x="96" y="302" fill="#6b7280" font-family="Inter,sans-serif" font-size="10">auto mode → 2-stage LLM classifier (fast + thinking)</text>
+
+    <line x1="320" y1="306" x2="320" y2="318" stroke="#4a5568" stroke-width="1.2" marker-end="url(#ahp2)"/>
+
+    <!-- 6: Hook scripts -->
+    <rect x="60" y="321" width="520" height="40" rx="8" fill="#1e1e35" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="96" y="340" fill="#93c5fd" font-family="Inter,sans-serif" font-size="10" font-weight="700" letter-spacing="0.06em">6 · HOOK SCRIPTS</text>
+    <text x="96" y="354" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10.5">User-defined PreToolUse / PostToolUse hooks · shell commands that can override decisions</text>
+
+    <line x1="320" y1="361" x2="320" y2="373" stroke="#4a5568" stroke-width="1.2" marker-end="url(#ahp2)"/>
+
+    <!-- 7: Tool checkPermissions -->
+    <rect x="60" y="376" width="520" height="40" rx="8" fill="#1e1e35" stroke="#6b7280" stroke-width="1.4"/>
+    <text x="96" y="395" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" font-weight="700" letter-spacing="0.06em">7 · TOOL checkPermissions()</text>
+    <text x="96" y="409" fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5">Tool-specific permission logic (e.g. BashTool safety checks, path validation)</text>
+
+    <line x1="320" y1="416" x2="320" y2="428" stroke="#4a5568" stroke-width="1.2" marker-end="url(#ahp2)"/>
+
+    <!-- 8: User dialog -->
+    <rect x="60" y="431" width="520" height="24" rx="8" fill="#1e1e35" stroke="#d97757" stroke-width="1.8"/>
+    <text x="320" y="447" fill="#d97757" font-family="Inter,sans-serif" font-size="11" font-weight="700" text-anchor="middle">8 · USER DIALOG — if still "ask": prompt the user</text>
+  </svg>
+</div>
+
+      <h2 id="permission-modes">Permission Modes</h2>
+
+      <p>The <code>PermissionMode</code> type controls the overall disposition of the permission system for a session:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th>Description</th>
+              <th>Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mode-interactive">default</span></td>
+              <td>Interactive mode. Every potentially dangerous operation prompts the user. The most conservative mode.</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td><span class="mode-interactive">acceptEdits</span></td>
+              <td>File edits are auto-approved; other operations (bash, web) still prompt. Useful for code review workflows.</td>
+              <td>Low-Medium</td>
+            </tr>
+            <tr>
+              <td><span class="mode-interactive">plan</span></td>
+              <td>Read-only mode: all write/execute tools are rejected. Claude can only read and plan. Model can enter this voluntarily via <code>EnterPlanModeTool</code>.</td>
+              <td>Very Low</td>
+            </tr>
+            <tr>
+              <td><span class="mode-auto">auto</span></td>
+              <td>LLM-based classifier makes real-time decisions. Enabled when <code>TRANSCRIPT_CLASSIFIER</code> feature flag is on. Uses a 2-stage (fast + thinking) classifier.</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td><span class="mode-bypass">bypassPermissions</span></td>
+              <td>All permission checks are skipped. Intended for headless CI/CD pipelines in isolated environments. Requires explicit configuration.</td>
+              <td>Very High</td>
+            </tr>
+            <tr>
+              <td><span class="mode-auto">dontAsk</span></td>
+              <td>Never ask the user; follow allow/deny rules only. If a rule doesn't match, default to deny. For non-interactive sessions.</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td><span class="mode-auto">bubble</span></td>
+              <td>Internal-only mode for subagents. Permission decisions bubble up to the parent agent's permission handler.</td>
+              <td>Inherits parent</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-danger">
+        <span class="callout-icon"><i data-lucide="alert-circle"></i></span>
+        <div class="callout-body">
+          <p><strong>Never use <code>bypassPermissions</code> in a shared or production environment.</strong> This mode disables all safety checks and allows Claude to execute arbitrary shell commands, overwrite any file, and make outbound network requests without any confirmation. It is designed only for air-gapped CI environments where the code is already trusted.</p>
+        </div>
+      </div>
+
+      <h2 id="can-use-tool">How canUseTool() Works</h2>
+
+      <p>The <code>canUseTool</code> function is the central gateway for all permission decisions. It is defined in <code>hooks/useCanUseTool.tsx</code> and has the signature:</p>
+
+      <pre><code class="language-typescript">// hooks/useCanUseTool.tsx
+export type CanUseToolFn = (
+  tool: Tool,
+  input: Record&lt;string, unknown&gt;,
+  context: ToolUseContext,
+  assistantMessage: AssistantMessage,
+  toolUseID: string,
+) =&gt; Promise&lt;PermissionResult&gt;
+
+// PermissionResult is a discriminated union:
+type PermissionResult =
+  | { behavior: 'allow'; updatedInput?: Input; decisionReason?: ... }
+  | { behavior: 'ask';   message: string; suggestions?: PermissionUpdate[] }
+  | { behavior: 'deny';  message: string; decisionReason: ... }
+  | { behavior: 'passthrough'; message: string }</code></pre>
+
+      <p>When <code>canUseTool</code> returns <code>'ask'</code>, the REPL shows a permission dialog. The user's response can:</p>
+      <ul>
+        <li><strong>Allow once</strong>, permits this specific call only.</li>
+        <li><strong>Allow always</strong>, adds a rule to <code>alwaysAllowRules</code> for this tool+pattern.</li>
+        <li><strong>Deny once</strong>, rejects this specific call, returns an error to Claude.</li>
+        <li><strong>Deny always</strong>, adds to <code>alwaysDenyRules</code> for this tool+pattern.</li>
+        <li><strong>Edit input</strong>, opens an editor to modify the tool's input before running it.</li>
+      </ul>
+
+      <h2 id="permission-rules">Permission Rules</h2>
+
+      <p>Rules are stored in three scopes and loaded at startup:</p>
+
+      <pre><code class="language-typescript">// Permission rule types (from types/permissions.ts)
+type PermissionRuleSource =
+  | 'userSettings'    // ~/.claude/settings.json
+  | 'projectSettings' // .claude/settings.json in project dir
+  | 'localSettings'   // .claude/settings.local.json (git-ignored)
+  | 'flagSettings'    // --allow-tools CLI flag
+  | 'policySettings'  // MDM-managed (enterprise)
+  | 'cliArg'          // --dangerously-skip-permissions (deprecated)
+  | 'command'         // /permissions command in REPL
+  | 'session'         // Runtime: allow/deny decisions this session
+
+// Example settings.json rules:
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",          // Allow any git command
+      "Bash(npm *)",          // Allow any npm command
+      "FileEdit(src/**)"      // Allow edits to src/ directory
+    ],
+    "deny": [
+      "Bash(rm -rf *)",       // Always deny dangerous rm
+      "Bash(sudo *)"          // Deny all sudo commands
+    ]
+  }
+}</code></pre>
+
+      <h3 id="pattern-matching">Pattern Matching</h3>
+
+      <p>Permission rules use glob-like patterns. Each tool implements <code>preparePermissionMatcher(input)</code> to define how its patterns are matched:</p>
+
+      <ul>
+        <li><strong>BashTool:</strong> <code>Bash(git *)</code> matches any bash command starting with <code>git</code>. Uses shell-word parsing, not simple string matching, to prevent bypass via quoting tricks.</li>
+        <li><strong>FileEditTool / FileReadTool:</strong> <code>FileEdit(src/**)</code> uses path glob matching against the resolved absolute path.</li>
+        <li><strong>MCPTool:</strong> <code>mcp__server__tool(*)</code> matches all calls to a specific MCP tool.</li>
+      </ul>
+
+      <h2 id="auto-mode-classifier">Auto Mode Classifier</h2>
+
+      <p>The <code>auto</code> permission mode uses a 2-stage classifier (<code>TRANSCRIPT_CLASSIFIER</code> feature flag) to make real-time security decisions:</p>
+
+      <pre><code class="language-typescript">// types/permissions.ts - classifier result type
+type YoloClassifierResult = {
+  thinking?: string          // Extended thinking from stage 2
+  shouldBlock: boolean       // Final decision
+  reason: string             // Human-readable explanation
+  unavailable?: boolean      // API error - fallback to prompting
+  transcriptTooLong?: boolean // Context window exceeded
+
+  // Stage tracking
+  stage?: 'fast' | 'thinking'
+  stage1Usage?: ClassifierUsage
+  stage1DurationMs?: number
+  stage1RequestId?: string
+  stage2Usage?: ClassifierUsage
+  stage2DurationMs?: number
+}
+
+// Stage 1: Fast classifier (low latency, heuristics)
+// Stage 2: Thinking classifier (if stage 1 is uncertain)
+// If classifier is unavailable → fall back to user prompt</code></pre>
+
+      <div class="callout callout-info">
+        <span class="callout-icon"><i data-lucide="info"></i></span>
+        <div class="callout-body">
+          <p>The classifier is designed to approve safe operations (reading files, running tests, standard git commands) automatically while blocking dangerous patterns (deleting system files, exfiltrating credentials, making unauthorized network requests). It uses the full conversation transcript as context so it can reason about the <em>intent</em> of an action, not just its form.</p>
+        </div>
+      </div>
+
+      <h2 id="bridge-security">Bridge Security Model</h2>
+
+      <p>The bridge system allows Claude Code to communicate with IDE extensions and other local clients. Security is enforced via JWT tokens and origin validation:</p>
+
+      <pre><code class="language-typescript">// Bridge security checks (from services/mcp/)
+// 1. JWT validation
+//    Every bridge message includes a signed JWT. The bridge server
+//    validates the signature against a per-session key stored in
+//    the keychain or temp dir. Unsigned/invalid messages are rejected.
+
+// 2. Origin allowlist
+//    The channelAllowlist.ts file defines which origins are permitted
+//    to connect to the bridge. Requests from unlisted origins are
+//    rejected before any message processing.
+
+// 3. Permissions safety check
+//    Even after authentication, bridged tool calls go through the
+//    full canUseTool() pipeline. The bridge cannot bypass permissions.
+
+// 4. Cross-machine prevention
+//    Bridge messages include the local machine's hostname. If the
+//    hostname doesn't match, it's classified as a 'safetyCheck'
+//    deny with classifierApprovable: false - the classifier cannot
+//    override this, only the user can.</code></pre>
+
+      <h2 id="api-key-handling">API Key Handling</h2>
+
+      <p>Claude Code supports several authentication mechanisms, each stored differently:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Auth Method</th>
+              <th>Storage</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ANTHROPIC_API_KEY env var</td>
+              <td>Process environment</td>
+              <td>Highest priority; used in CI/CD pipelines</td>
+            </tr>
+            <tr>
+              <td>claude.ai OAuth</td>
+              <td>macOS Keychain / libsecret (Linux)</td>
+              <td>Preferred for interactive use; prefetched at startup</td>
+            </tr>
+            <tr>
+              <td>Legacy API key</td>
+              <td>macOS Keychain / libsecret</td>
+              <td>For users who set up key before OAuth was available</td>
+            </tr>
+            <tr>
+              <td>AWS Bedrock credentials</td>
+              <td>AWS credential chain</td>
+              <td>For enterprise Bedrock deployments</td>
+            </tr>
+            <tr>
+              <td>GCP Vertex credentials</td>
+              <td>GCP ADC / service account</td>
+              <td>For enterprise Vertex deployments</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The <code>startKeychainPrefetch()</code> function fires both keychain reads (OAuth + legacy) in parallel at startup, before any other initialization, to avoid the ~65ms per-read latency from blocking the main flow.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon"><i data-lucide="alert-triangle"></i></span>
+        <div class="callout-body">
+          <p>API keys are <em>never</em> written to disk by Claude Code itself. The keychain is used for OAuth tokens; raw API keys set via environment variable are never persisted by the tool. If you add <code>ANTHROPIC_API_KEY</code> to a <code>.env</code> file in a project, Claude Code will pick it up, but that's your decision, the tool does not write keys to files.</p>
+        </div>
+      </div>
+
+      <h2 id="input-sanitization">Input Sanitization Patterns</h2>
+
+      <p>Claude Code applies several layers of input sanitization before tool execution:</p>
+
+      <h3 id="zod-validation">Zod Schema Validation</h3>
+      <p>Every tool's <code>inputSchema</code> is a Zod schema. The query pipeline validates all tool input against this schema before calling <code>validateInput()</code> or <code>checkPermissions()</code>. Invalid inputs are rejected with a descriptive error returned to the model.</p>
+
+      <h3 id="path-normalization">Path Normalization</h3>
+      <p>File paths in tool inputs are resolved to absolute paths and validated against the current working directory and any additional allowed directories. Attempts to path-traverse outside allowed directories are caught as safety check violations with <code>classifierApprovable: false</code>.</p>
+
+      <h3 id="bash-safety">Bash Command Safety</h3>
+      <p>BashTool implements sophisticated command safety checking:</p>
+
+      <pre><code class="language-typescript">// BashTool safety checks (simplified):
+// 1. Command parsing - splits compound commands to check each sub-command
+// 2. Dangerous pattern detection:
+//    - Commands that could exfiltrate data (curl | sh, wget + exec)
+//    - Recursive deletes (rm -rf /, rm -rf ~)
+//    - Credential reads (cat ~/.ssh/id_rsa, cat ~/.aws/credentials)
+//    - Shell config writes (.bashrc, .zshrc)
+// 3. Working directory enforcement
+//    - Commands are run with CWD set to the session's working directory
+//    - cd .. chaining is detected and flagged
+// 4. Timeout enforcement
+//    - Default 2-minute timeout per command
+//    - Long-running commands require explicit user approval</code></pre>
+
+      <h3 id="mcp-sanitization">MCP Tool Sanitization</h3>
+      <p>MCP tools are treated with extra caution because their schemas come from external servers:</p>
+      <ul>
+        <li>MCP tool names are normalized via <code>mcpStringUtils.ts</code> to prevent injection via malicious tool names.</li>
+        <li>MCP server connections require explicit user approval (via <code>mcpServerApproval.tsx</code>) before any tools are exposed.</li>
+        <li>Each MCP server's tools are prefixed with the server name (<code>mcp__servername__toolname</code>) to prevent tool name collisions.</li>
+        <li>MCP tool results are subject to the same <code>maxResultSizeChars</code> overflow protection as built-in tools.</li>
+      </ul>
+
+      <h2 id="denial-tracking">Denial Tracking</h2>
+
+      <p>The permission system tracks how many times tool calls have been denied in a session via <code>DenialTrackingState</code>. When denials accumulate beyond a threshold, the system switches from automatic denial to interactive prompting, preventing infinite loops where Claude repeatedly requests a denied operation without realizing it.</p>
+
+      <pre><code class="language-typescript">// utils/permissions/denialTracking.ts
+type DenialTrackingState = {
+  denialCount: Map&lt;string, number&gt;  // tool name → denial count
+  lastDenialTime: Map&lt;string, number&gt;
+}
+
+// Async subagents use a localDenialTracking field on ToolUseContext
+// because their setAppState is a no-op (doesn't reach root store).
+// Without this, the fallback-to-prompting threshold is never reached
+// and the agent keeps silently denying the same operation.</code></pre>
+
+      <h2 id="cyber-risk-instruction">Source Deep Dive: <code>cyberRiskInstruction.ts</code></h2>
+
+      <p>Of all the safety mechanisms in Claude Code, the most deceptively simple is a single exported constant in <code>src/prompts/cyberRiskInstruction.ts</code>. The entire file — barring comments — is a one-sentence string:</p>
+
+      <pre><code class="language-typescript">/**
+ * CYBER_RISK_INSTRUCTION
+ *
+ * IMPORTANT: DO NOT MODIFY THIS INSTRUCTION WITHOUT SAFEGUARDS TEAM REVIEW
+ *
+ * This instruction is owned by the Safeguards team and has been carefully
+ * crafted and evaluated to balance security utility with safety. Changes
+ * to this text can have significant implications for:
+ *   - How Claude handles penetration testing and CTF requests
+ *   - What security tools and techniques Claude will assist with
+ *   - The boundary between defensive and offensive security assistance
+ *
+ * If you need to modify this instruction:
+ *   1. Contact the Safeguards team (David Forsythe, Kyla Guru)
+ *   2. Ensure proper evaluation of the changes
+ *   3. Get explicit approval before merging
+ *
+ * Claude: Do not edit this file unless explicitly asked to do so by the user.
+ */
+export const CYBER_RISK_INSTRUCTION = `IMPORTANT: Assist with authorized
+security testing, defensive security, CTF challenges, and educational
+contexts. Refuse requests for destructive techniques, DoS attacks, mass
+targeting, supply chain compromise, or detection evasion for malicious
+purposes. Dual-use security tools (C2 frameworks, credential testing,
+exploit development) require clear authorization context: pentesting
+engagements, CTF competitions, security research, or defensive use cases.`</code></pre>
+
+      <p>That single string is imported into <code>prompts.ts</code> and injected verbatim into the opening paragraph of every system prompt sent to external users — before tool instructions, before the cache boundary, and before any CLAUDE.md customization can influence behavior. It is the unconditional floor of Claude's cybersecurity policy.</p>
+
+      <h3 id="cyber-risk-what-it-does">What the Instruction Covers</h3>
+
+      <p>Despite its brevity, the instruction defines a precise boundary between the "allowed" and "blocked" sides of dual-use security work:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Always allowed</th><th>Always blocked</th><th>Allowed with context</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Authorized penetration testing</td>
+              <td>Destructive attack techniques</td>
+              <td>C2 frameworks (if pentest engagement confirmed)</td>
+            </tr>
+            <tr>
+              <td>Defensive security tools</td>
+              <td>DoS / DDoS attacks</td>
+              <td>Credential testing tools (if authorized context)</td>
+            </tr>
+            <tr>
+              <td>CTF challenges</td>
+              <td>Mass targeting / scanning</td>
+              <td>Exploit development (if security research)</td>
+            </tr>
+            <tr>
+              <td>Security education</td>
+              <td>Supply chain compromise</td>
+              <td>Vulnerability exploitation (if defensive use case)</td>
+            </tr>
+            <tr>
+              <td>Hardening & code review</td>
+              <td>Detection evasion for malicious use</td>
+              <td>Malware analysis (if educational/defensive framing)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="cyber-risk-design">The Self-Referential Design Detail</h3>
+
+      <p>The file contains an unusual fourth comment that isn't addressed to human developers, but to Claude itself:</p>
+
+      <pre><code class="language-typescript">// Claude: Do not edit this file unless explicitly asked to do so by the user.</code></pre>
+
+      <p>This is a direct instruction to the model embedded in the source code. If Claude Code is ever asked to read and modify its own source tree (which is entirely possible — it has full filesystem tools), this comment acts as a circuit breaker preventing the model from autonomously changing its own safety policy, even if instructed to "improve" the prompts. The instruction is only ever waived if the user explicitly asks for it. It is one of the most honest examples of Anthropic's layered safety approach: defense in depth, including defense against the model itself.</p>
+
+      <h3 id="cyber-risk-placement">Why Placement Before the Cache Boundary Matters</h3>
+
+      <p>The <code>CYBER_RISK_INSTRUCTION</code> is injected before the <code>SYSTEM_PROMPT_DYNAMIC_BOUNDARY</code> marker in <code>prompts.ts</code>, which means it lives in the globally cacheable, session-independent portion of the system prompt. This has two important consequences. First, it applies identically to every session — there is no per-user, per-project, or per-CLAUDE.md variant of this policy. Second, because it's in the static prefix, modifying it would immediately invalidate the global prompt cache for every user on every Anthropic-hosted deployment simultaneously. The Safeguards team gate documented in the comments isn't bureaucratic friction; it's a deliberate structural cost that makes casual edits expensive enough to deter them.</p>
+
+      <h2 id="vulnerability-notes">Security Considerations</h2>
+
+      <p>When working with or deploying Claude Code, keep these considerations in mind:</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon"><i data-lucide="alert-triangle"></i></span>
+        <div class="callout-body">
+          <p><strong>Prompt injection via file contents:</strong> If Claude reads a file that contains adversarial instructions ("Ignore previous instructions and..."), the model may be manipulated into taking unauthorized actions. The permission system is the defense layer, even if the model is deceived into <em>requesting</em> a dangerous action, <code>canUseTool()</code> still requires approval before execution.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon"><i data-lucide="alert-triangle"></i></span>
+        <div class="callout-body">
+          <p><strong>Auto-approve rules are persistent:</strong> When you click "Allow always" for a tool+pattern, the rule is written to your settings file and applies to all future sessions. Review your <code>~/.claude/settings.json</code> periodically to audit accumulated allow rules.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <span class="callout-icon"><i data-lucide="info"></i></span>
+        <div class="callout-body">
+          <p><strong>Project settings are shared:</strong> Rules in <code>.claude/settings.json</code> are committed to version control and apply to everyone who uses Claude Code in that project. Be thoughtful about what you allow at the project level, these become the defaults for all contributors.</p>
+        </div>
+      </div>
+
+      <section class="faq-section" id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details class="faq-item">
+          <summary>Is it safe to give Claude bash access?</summary>
+          <div class="faq-content">Claude Code provides a granular permission system (ask, allow, deny) to prevent unattended destruction. You are always prompted before dangerous actions unless you explicitly whitelist them.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Does the tool system circumvent permissions?</summary>
+          <div class="faq-content">No. Every execution goes through the <code>canUseTool()</code> function which securely evaluates the current PermissionMode constraint before continuing.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What is the isolated execution mode?</summary>
+          <div class="faq-content">For advanced use cases, there are mechanisms designed to sandbox executions, ensuring that rogue commands do not compromise your entire file system.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I auto-approve specific folders?</summary>
+          <div class="faq-content">Yes, you can specify trusted directories where certain non-destructive commands are auto-approved to significantly speed up your development workflows.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How does OAuth token management work?</summary>
+          <div class="faq-content">The session utilizes secure JWT-based device trust persistently stored in your local keychain to maintain authentication with the Anthropic cloud infrastructure.</div>
+        </details>
+      </section>
+
+    </main>
+
+    <nav class="toc" aria-label="On this page">
+      <div class="toc-title">On This Page</div>
+      <ul class="toc-list" id="toc-list"></ul>
+    </nav>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  });
+</script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

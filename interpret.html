@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navigate the Source | Learn from Claude Leaked Code</title>
+  <meta name="description" content="A practical guide to reading the Claude Code source to understand, predict, and influence Claude's behavior — CLAUDE.md, tool descriptions, feature flags, permissions, and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ---- Interpret-page specific styles ---- */
+    .behavior-map {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+    }
+    .behavior-map-header {
+      background: linear-gradient(135deg, rgba(217,119,87,0.12), rgba(139,92,246,0.12));
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+    .behavior-map-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+      transition: background var(--tr);
+    }
+    .behavior-map-row:last-child { border-bottom: none; }
+    .behavior-map-row:hover { background: var(--surface); }
+    .behavior-map-row .col-observe { color: var(--text); font-size: 0.875rem; }
+    .behavior-map-row .col-source  { font-family: var(--font-mono); font-size: 0.78rem; color: var(--coral); }
+    .behavior-map-row .col-lever   { font-size: 0.875rem; color: var(--text-muted); }
+
+    .tag-pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 0.2em 0.6em;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .tag-pill.system-prompt { background: rgba(217,119,87,0.15); color: var(--coral); }
+    .tag-pill.tool          { background: rgba(59,130,246,0.15);  color: #60a5fa; }
+    .tag-pill.memory        { background: rgba(16,185,129,0.15);  color: #34d399; }
+    .tag-pill.permission    { background: rgba(245,158,11,0.15);  color: #fbbf24; }
+    .tag-pill.feature-flag  { background: rgba(139,92,246,0.15);  color: #a78bfa; }
+
+    .source-trace {
+      background: var(--code-bg);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.25rem 0;
+      border-left: 3px solid var(--coral);
+    }
+    .source-trace .trace-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+      font-size: 0.875rem;
+    }
+    .source-trace .trace-step:last-child { margin-bottom: 0; }
+    .source-trace .trace-num {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 50%;
+      background: var(--coral);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .source-trace .trace-file {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--coral);
+    }
+    .source-trace .trace-desc {
+      color: #a0aec0;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .insight-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    .insight-card .ic-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .insight-card .ic-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .insight-card .ic-body {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .cheatsheet {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+    }
+    .cheatsheet table { margin: 0; }
+    .cheatsheet thead th { background: var(--code-bg); }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">CC</div>
+      <span class="logo-text">Learn from Claude <span>Leaked Code</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+      <button class="btn-icon hamburger" id="hamburger" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle dark mode">
+        <span id="theme-icon">
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" style="display:none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span class="nav-icon"><i data-lucide="book-open"></i></span> Introduction</a>
+        <a href="architecture.html"><span class="nav-icon"><i data-lucide="layers"></i></span> Architecture</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Systems</div>
+      <nav class="sidebar-nav">
+        <a href="query-engine.html"><span class="nav-icon"><i data-lucide="zap"></i></span> Query Engine</a>
+        <a href="tools.html"><span class="nav-icon"><i data-lucide="wrench"></i></span> Tools System</a>
+        <a href="security.html"><span class="nav-icon"><i data-lucide="shield"></i></span> Security &amp; Permissions</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Advanced</div>
+      <nav class="sidebar-nav">
+        <a href="best-practices.html"><span class="nav-icon"><i data-lucide="star"></i></span> Best Practices</a>
+        <a href="mcp-skills.html"><span class="nav-icon"><i data-lucide="plug"></i></span> MCP &amp; Skills</a>
+        <a href="interpret.html" class="active"><span class="nav-icon"><i data-lucide="compass"></i></span> Navigate the Source</a>
+      </nav>
+    </div>
+    <div class="sidebar-download">
+      <a href="https://github.com/Shreyan1/claude-code-src-leaked" target="_blank" rel="noopener" class="download-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.66-.17.61-.19 1.25-.05 1.87L9 22"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        View Full Leaked Code
+      </a>
+      <p class="download-note">On GitHub &middot; Shreyan1/claude-code-src-leaked</p>
+      <a href="https://www.linkedin.com/in/shreyanbasuray/" target="_blank" rel="noopener" class="linkedin-follow-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Follow on LinkedIn
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="content-wrapper">
+    <main class="page-content">
+
+      <div class="breadcrumb">
+        <a href="index.html">Learn from Claude Leaked Code</a>
+        <span class="sep">/</span>
+        <span>Navigate the Source</span>
+      </div>
+
+      <span class="section-tag">Source Guide</span>
+      <h1>Navigate the Source: Understand, Predict &amp; Influence Claude</h1>
+      <p class="page-intro">Most people treat Claude as a black box. You aren't most people. With the source in hand, you can trace any behavior back to its exact origin, understand <em>why</em> Claude makes certain decisions, and know precisely where to look to change them. This guide is your map.</p>
+
+      <!-- ================================================================ -->
+      <h2 id="mental-model">The Mental Model: What Claude Actually Sees</h2>
+
+      <p>Before opening a single file, internalize this: from Claude's perspective, every conversation is a carefully assembled JSON payload sent to the API. The source code's primary job is constructing that payload. Once you understand what ends up in it, you understand Claude's behavior.</p>
+
+      <p>The payload has three major parts that the source assembles before every API call:</p>
+
+      <div class="insight-grid">
+        <div class="insight-card">
+          <div class="ic-icon">📋</div>
+          <div class="ic-title">System Prompt</div>
+          <div class="ic-body">Built by <code>context.ts</code> from multiple fragments: base instructions, git status, date/time, injected memory (CLAUDE.md), and tool usage guidelines. This is Claude's instruction manual — it never changes mid-turn.</div>
+        </div>
+        <div class="insight-card">
+          <div class="ic-icon">🔧</div>
+          <div class="ic-title">Tool Schemas</div>
+          <div class="ic-body">Every available tool is serialized into a JSON schema with a <code>name</code>, <code>description</code>, and <code>inputSchema</code>. The description text is literally what Claude reads to decide <em>when</em> to use a tool. Tool order in the array influences selection probability.</div>
+        </div>
+        <div class="insight-card">
+          <div class="ic-icon">💬</div>
+          <div class="ic-title">Message History</div>
+          <div class="ic-body">The normalized conversation: user messages, Claude's text + tool_use blocks, and tool_result blocks. The <code>normalizeMessagesForAPI()</code> function strips all UI-only message types before sending. What's left is exactly what Claude reasons over.</div>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon"><i data-lucide="lightbulb"></i></span>
+        <div class="callout-body">
+          <strong>The golden rule:</strong> If you want to understand why Claude behaved a certain way, ask yourself — <em>"What was in the payload at the time?"</em> The source code is just a machine for building that payload.
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="tracing-behavior">Tracing a Behavior Back to Source</h2>
+
+      <p>When you see Claude do something surprising, you can always trace it. Here's the playbook. Work backwards from the observable behavior:</p>
+
+      <h3 id="example-trace-bash-permission">Example: "Why does Claude always ask before running bash commands?"</h3>
+
+      <div class="source-trace">
+        <div class="trace-step">
+          <div class="trace-num">1</div>
+          <div>
+            <span class="trace-file">tools/BashTool/BashTool.ts</span>
+            <div class="trace-desc">Look at <code>checkPermissions()</code>. BashTool does <em>not</em> declare <code>isReadOnly: () =&gt; true</code>, so <code>buildTool()</code>'s fail-closed defaults kick in. Every bash invocation routes to the permission system.</div>
+          </div>
+        </div>
+        <div class="trace-step">
+          <div class="trace-num">2</div>
+          <div>
+            <span class="trace-file">hooks/useCanUseTool.tsx</span>
+            <div class="trace-desc">This hook evaluates the current <code>permissionMode</code> from <code>AppState</code>. In default <code>interactive</code> mode it calls <code>showPermissionDialog()</code> for non-read-only tools.</div>
+          </div>
+        </div>
+        <div class="trace-step">
+          <div class="trace-num">3</div>
+          <div>
+            <span class="trace-file">utils/permissions/</span>
+            <div class="trace-desc">The permission rules live here. You'll find the <code>allow-list</code> for commands that auto-approve (like <code>ls</code>, <code>cat</code>, <code>git status</code>) vs those that always ask.</div>
+          </div>
+        </div>
+        <div class="trace-step">
+          <div class="trace-num">4</div>
+          <div>
+            <span class="trace-file">Levers: <code>--auto</code> flag, settings.json <code>permissionMode</code></span>
+            <div class="trace-desc">To suppress the dialog: run with <code>--auto</code> (still prompts on destructive ops) or <code>--dangerously-skip-permissions</code> (no prompts at all). Both modify the <code>permissionMode</code> field in AppState before the first query.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="example-trace-memory">Example: "Why does Claude 'remember' things I told it in a previous session?"</h3>
+
+      <div class="source-trace">
+        <div class="trace-step">
+          <div class="trace-num">1</div>
+          <div>
+            <span class="trace-file">memdir/</span>
+            <div class="trace-desc">On startup, Claude Code scans for <code>CLAUDE.md</code> files starting at the current directory and walking up to the root. It also checks <code>~/.claude/CLAUDE.md</code> for global preferences.</div>
+          </div>
+        </div>
+        <div class="trace-step">
+          <div class="trace-num">2</div>
+          <div>
+            <span class="trace-file">context.ts → getUserContext()</span>
+            <div class="trace-desc">The loaded CLAUDE.md contents are assembled into <code>AttachmentMessage</code> objects and prepended to the conversation as injected system context — not as user messages, but as a special attachment layer that Claude always sees.</div>
+          </div>
+        </div>
+        <div class="trace-step">
+          <div class="trace-num">3</div>
+          <div>
+            <span class="trace-file">Lever: Write to CLAUDE.md</span>
+            <div class="trace-desc">Anything you put in <code>CLAUDE.md</code> at your project root (or <code>~/.claude/CLAUDE.md</code> globally) will be injected into <em>every</em> session's context. This is the most powerful persistent influence mechanism available.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="example-trace-tools">Example: "Why does Claude reach for Grep before FileRead when searching?"</h3>
+
+      <div class="source-trace">
+        <div class="trace-step">
+          <div class="trace-num">1</div>
+          <div>
+            <span class="trace-file">tools.ts → getAllBaseTools()</span>
+            <div class="trace-desc">The tool list order matters. <code>GlobTool</code> and <code>GrepTool</code> appear before <code>FileReadTool</code> in the array. When this array is serialized to the API, earlier tools appear more prominently in the tool list, and Claude statistically prefers tools listed earlier for ambiguous tasks.</div>
+          </div>
+        </div>
+        <div class="trace-step">
+          <div class="trace-num">2</div>
+          <div>
+            <span class="trace-file">tools/GrepTool/GrepTool.ts → description string</span>
+            <div class="trace-desc">The description says something like: <em>"Search file contents using regex. Use this to find function definitions, variable usages, import statements."</em> Claude reads this literally — it uses Grep because its description matches the intent of "find something in code".</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="tool-descriptions">Tool Descriptions: Claude's Vocabulary</h2>
+
+      <p>This is the single most actionable insight in the entire codebase: <strong>the <code>description</code> string in each tool file is literally what Claude reads to decide when to use that tool.</strong> It is not documentation. It is a behavioral instruction.</p>
+
+      <p>Every tool exports a <code>description</code> property (or its <code>buildTool()</code> config contains one). When the API payload is built, these descriptions are serialized verbatim into the tool schemas sent to Claude. So when you wonder "why did Claude use BashTool for this instead of FileReadTool?" — read both descriptions side by side and ask which one better matches what you asked for.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Key phrase in its description (what triggers it)</th>
+              <th>What it implies for your prompts</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tool-name">BashTool</td>
+              <td>"execute commands", "run scripts", "install packages", "compile"</td>
+              <td>Say "run", "execute", "install", "compile" to trigger BashTool. Say "read", "show me" to avoid it.</td>
+            </tr>
+            <tr>
+              <td class="tool-name">FileEditTool</td>
+              <td>"make changes to existing files", "surgical replacement"</td>
+              <td>Explicitly saying "edit line X" or "change this function" routes to FileEditTool. "Replace the whole file" routes to FileWriteTool.</td>
+            </tr>
+            <tr>
+              <td class="tool-name">GrepTool</td>
+              <td>"search file contents", "find definitions", "locate usages"</td>
+              <td>Asking Claude to "find where X is used" will reliably trigger Grep before any file read.</td>
+            </tr>
+            <tr>
+              <td class="tool-name">AgentTool</td>
+              <td>"spawn a subagent", "parallel tasks", "delegate work"</td>
+              <td>Phrasing like "do this in parallel" or "handle each file independently" may trigger AgentTool spawning sub-agents.</td>
+            </tr>
+            <tr>
+              <td class="tool-name">EnterPlanModeTool</td>
+              <td>"before making changes, create a plan", "risky operation"</td>
+              <td>Claude can self-trigger plan mode when it perceives high risk. You can also ask "make a plan first" to push it there explicitly.</td>
+            </tr>
+            <tr>
+              <td class="tool-name">AskUserQuestionTool</td>
+              <td>"when you need clarification", "ambiguous requirements"</td>
+              <td>Claude uses this when your prompt genuinely lacks necessary information. Being vague = more AskUserQuestion calls. Be specific to minimize interruptions.</td>
+            </tr>
+            <tr>
+              <td class="tool-name">WebFetchTool</td>
+              <td>"fetch content from URL", "read documentation", "access web page"</td>
+              <td>Include a URL in your request and Claude will almost always use WebFetch, even if you didn't explicitly ask for it.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info">
+        <span class="callout-icon"><i data-lucide="info"></i></span>
+        <div class="callout-body">
+          <strong>How to find any tool's description:</strong> Open <code>src/tools/[ToolName]/[ToolName].ts</code> in the source repository and look for the <code>description</code> field in the <code>buildTool()</code> call. The exact text there is what Claude reads. If you want Claude to prefer one tool over another, match your phrasing to that tool's description language.
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="claude-md">CLAUDE.md: Your Direct Line to Every Session</h2>
+
+      <p>The most underused power-user feature in Claude Code is also the simplest. <code>CLAUDE.md</code> files are Markdown documents that get injected as context into <em>every single session</em> that runs in their directory. They are loaded by <code>memdir/</code>, assembled by <code>context.ts → getUserContext()</code>, and prepended to the message history as <code>AttachmentMessage</code> objects before the first API call.</p>
+
+      <h3 id="claude-md-locations">Where Claude Looks (in priority order)</h3>
+
+      <div class="diagram-box">
+<span class="d-green">1. Project root</span>   <span class="d-muted">→</span>  <span class="d-yellow">./CLAUDE.md</span>        <span class="d-muted"># loaded for sessions in this project</span>
+<span class="d-green">2. Parent dirs</span>     <span class="d-muted">→</span>  <span class="d-yellow">../CLAUDE.md</span>       <span class="d-muted"># walked upward to filesystem root</span>
+<span class="d-green">3. Subdirectory</span>    <span class="d-muted">→</span>  <span class="d-yellow">src/CLAUDE.md</span>      <span class="d-muted"># scoped context for that subdirectory</span>
+<span class="d-green">4. Global</span>          <span class="d-muted">→</span>  <span class="d-yellow">~/.claude/CLAUDE.md</span> <span class="d-muted"># always loaded, every project</span></div>
+
+      <h3 id="claude-md-what-to-put">What to Put in CLAUDE.md</h3>
+
+      <p>Because CLAUDE.md is injected into the system context (not as a user message), it has stronger influence than anything you type in the chat. Think of it as a standing order that never expires. The source's <code>context.ts</code> assembles it under a heading like <code># Memory</code> in the system prompt, so Claude treats it as authoritative project context.</p>
+
+      <pre><code class="language-markdown"># Project: my-api-server
+
+## Stack
+- Node.js 20, TypeScript strict mode
+- Postgres via Prisma ORM
+- Vitest for tests (NOT Jest)
+
+## Conventions
+- Functions: camelCase. Files: kebab-case. Classes: PascalCase.
+- Always add JSDoc to exported functions.
+- Prefer `const` assertions over enums.
+
+## What NOT to do
+- Never use `any` type — use `unknown` and narrow.
+- Never commit directly to main — always use feature branches.
+- Never log secrets even in dev.
+
+## Test pattern
+- Co-locate tests: `src/foo.ts` → `src/foo.test.ts`
+- Run tests: `npm test`
+
+## Current focus
+Working on the auth module. Most files in `src/auth/` are WIP.</code></pre>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon"><i data-lucide="lightbulb"></i></span>
+        <div class="callout-body">
+          <strong>Practical power moves with CLAUDE.md:</strong> You can permanently ban specific behaviors (<em>"Never use var, always const"</em>), set coding style rules, pin team conventions, document known gotchas in the codebase, and even specify which test runner to use. Claude respects these as authoritative because they appear in the injected context layer, not the conversation.
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="feature-flags">Feature Flags: What's Actually Running</h2>
+
+      <p>The source uses Bun's <code>feature()</code> DCE macro to compile entire subsystems in or out. In the public release of Claude Code, some of these flags are on and some are off. Knowing which are which tells you what capabilities are actually available versus what's in the source but not exposed.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>What it enables</th>
+              <th>Status in public build</th>
+              <th>Where to check</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>KAIROS</code></td>
+              <td>KAIROS assistant mode — an alternative interaction paradigm, different from the standard REPL</td>
+              <td>Off (internal only)</td>
+              <td><code>assistant/index.ts</code></td>
+            </tr>
+            <tr>
+              <td><code>VOICE_MODE</code></td>
+              <td>Voice input/output support</td>
+              <td>Off (experimental)</td>
+              <td><code>voice/</code></td>
+            </tr>
+            <tr>
+              <td><code>BRIDGE_MODE</code></td>
+              <td>Remote WebSocket bridge for cloud-hosted execution environments</td>
+              <td>On (for claude.ai/code web)</td>
+              <td><code>bridge/bridgeMain.ts</code></td>
+            </tr>
+            <tr>
+              <td><code>DAEMON</code></td>
+              <td>Background daemon process for persistent agent sessions</td>
+              <td>Partial (internal)</td>
+              <td><code>entrypoints/</code></td>
+            </tr>
+            <tr>
+              <td><code>COORDINATOR_MODE</code></td>
+              <td>Multi-agent coordinator that orchestrates swarms of worker agents</td>
+              <td>Off (experimental)</td>
+              <td><code>coordinator/coordinatorMode.ts</code></td>
+            </tr>
+            <tr>
+              <td><code>PROACTIVE</code></td>
+              <td>Proactive task suggestions, SleepTool (Claude can pause and wait)</td>
+              <td>Off</td>
+              <td><code>tools/SleepTool/</code></td>
+            </tr>
+            <tr>
+              <td><code>AGENT_TRIGGERS</code></td>
+              <td>Cron-based scheduling: <code>ScheduleCronTool</code> and related tools</td>
+              <td>On (via Cowork)</td>
+              <td><code>tools/ScheduleCronTool/</code></td>
+            </tr>
+            <tr>
+              <td><code>WORKFLOW_SCRIPTS</code></td>
+              <td>Workflow automation: multi-step scripted agent workflows</td>
+              <td>Off (experimental)</td>
+              <td><code>commands/workflows/</code></td>
+            </tr>
+            <tr>
+              <td><code>REACTIVE_COMPACT</code></td>
+              <td>Reactive context window compaction (triggered automatically)</td>
+              <td>On</td>
+              <td><code>services/compact/reactiveCompact.ts</code></td>
+            </tr>
+            <tr>
+              <td><code>CONTEXT_COLLAPSE</code></td>
+              <td>More aggressive context collapsing for very long sessions</td>
+              <td>Off</td>
+              <td><code>services/contextCollapse/</code></td>
+            </tr>
+            <tr>
+              <td><code>EXPERIMENTAL_SKILL_SEARCH</code></td>
+              <td>Fuzzy search for skill discovery</td>
+              <td>Off</td>
+              <td><code>skills/</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The key file to read for flag usage is <code>tools.ts</code> — it has the most flag-conditional logic. Any <code>feature('FLAG_NAME') ? require(...) : null</code> pattern tells you that the following code only exists in builds where that flag is enabled.</p>
+
+      <!-- ================================================================ -->
+      <h2 id="permission-prediction">Permission System: Predicting What Gets Blocked</h2>
+
+      <p>Every tool call passes through a permission gate before execution. You can predict whether a given operation will need user approval by reading three boolean flags on the tool:</p>
+
+      <pre><code class="language-typescript">// These three flags on every tool determine permission behavior:
+isReadOnly(input): boolean     // true  → auto-approve in most modes
+isConcurrencySafe(input): boolean  // true  → can run in parallel batches
+isDestructive(input): boolean  // true  → triggers EXTRA-prominent dialog
+
+// The defaults in buildTool() are fail-closed:
+// isReadOnly: false     → assumed to write, needs permission
+// isDestructive: false  → not flagged as extra-dangerous</code></pre>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Mode</th>
+              <th>Outcome</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>GrepTool</code> — <code>isReadOnly: true</code></td>
+              <td>Any</td>
+              <td>✅ Auto-approved, runs silently</td>
+            </tr>
+            <tr>
+              <td><code>GlobTool</code> — <code>isReadOnly: true</code></td>
+              <td>Any</td>
+              <td>✅ Auto-approved, runs silently</td>
+            </tr>
+            <tr>
+              <td><code>FileEditTool</code> — not read-only</td>
+              <td>interactive (default)</td>
+              <td>⏸ Shows diff, waits for y/n</td>
+            </tr>
+            <tr>
+              <td><code>FileEditTool</code> — not read-only</td>
+              <td>auto (<code>--auto</code>)</td>
+              <td>✅ Auto-approved unless path is sensitive</td>
+            </tr>
+            <tr>
+              <td><code>BashTool</code> — risky command detected</td>
+              <td>interactive</td>
+              <td>⏸ Prominent dialog with command preview</td>
+            </tr>
+            <tr>
+              <td><code>BashTool</code> — safe command (git status, ls)</td>
+              <td>interactive</td>
+              <td>✅ Auto-approved (on allow-list)</td>
+            </tr>
+            <tr>
+              <td>Any tool — <code>isDestructive: true</code></td>
+              <td>interactive or auto</td>
+              <td>⛔ Red-highlighted dialog, requires explicit confirmation</td>
+            </tr>
+            <tr>
+              <td>Any tool</td>
+              <td>bypass (<code>--dangerously-skip-permissions</code>)</td>
+              <td>✅ Always auto-approved (no exceptions)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon"><i data-lucide="alert-triangle"></i></span>
+        <div class="callout-body">
+          <strong>The permission allow-list</strong> lives in <code>utils/permissions/</code>. It contains the specific bash commands that auto-approve in interactive mode (things like <code>git status</code>, <code>cat</code>, <code>ls</code>, <code>echo</code>). If you find Claude auto-approving a command you expected it to ask about, that command is on this list.
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="context-compaction">Context Window &amp; Compaction: Why Claude "Forgets"</h2>
+
+      <p>Long sessions inevitably hit the context window limit. Claude Code manages this with three compaction strategies defined in <code>services/compact/</code>. Understanding them explains the "memory loss" behavior many users experience.</p>
+
+      <div class="diagram-box">
+<span class="d-coral">Compaction strategies (services/compact/)</span>
+<span class="d-muted">│</span>
+<span class="d-muted">├──</span> <span class="d-blue">AutoCompact</span>           <span class="d-muted"># Triggered when approaching token limit</span>
+<span class="d-muted">│      │</span>  Summarizes and removes oldest tool-use/result pairs
+<span class="d-muted">│      └</span>  Preserves user and assistant text messages
+<span class="d-muted">│</span>
+<span class="d-muted">├──</span> <span class="d-blue">Microcompact</span>          <span class="d-muted"># Inline: shrinks individual tool outputs</span>
+<span class="d-muted">│      │</span>  Large outputs (bash stdout, file contents) replaced
+<span class="d-muted">│      └</span>  with summaries: "Output was 4,200 lines — summary: ..."
+<span class="d-muted">│</span>
+<span class="d-muted">└──</span> <span class="d-blue">Snip</span>                  <span class="d-muted"># Nuclear option: removes entire conversation sections</span>
+<span class="d-muted">       │</span>  Targets the oldest, least-referenced segments
+<span class="d-muted">       └</span>  Only used when approaching hard context limit</div>
+
+      <h3 id="what-gets-compacted-first">What Gets Compacted First</h3>
+
+      <p>Compaction is not random. The strategies prioritize removing <code>tool_use</code> / <code>tool_result</code> message pairs before touching actual conversational text. This is intentional: tool exchange data (file contents, bash output) is large and disposable once Claude has processed it. Your conversation messages (the human-readable exchanges) survive much longer.</p>
+
+      <p>The practical implication: if you showed Claude a large file early in the session, there's a good chance the file contents were compacted out after a few more turns. If you need Claude to reference that file again later, use <code>FileReadTool</code> (or ask Claude to re-read it) rather than assuming it still "remembers."</p>
+
+      <h3 id="compaction-control">How to Control Compaction</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Technique</th><th>How it works</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Keep sessions focused</td>
+              <td>Each task in its own session means the context never gets cluttered with irrelevant history. Claude Code's <code>/new</code> command starts a fresh session.</td>
+            </tr>
+            <tr>
+              <td>Put critical context in CLAUDE.md</td>
+              <td>Since CLAUDE.md is injected fresh at the start of every turn (not stored in message history), it's immune to compaction. Anything you need Claude to always know belongs there.</td>
+            </tr>
+            <tr>
+              <td>Use <code>/compact</code> manually</td>
+              <td>The <code>/compact</code> slash command triggers a controlled compaction + summary before the limit hits. You control the timing and get a summary of what was removed.</td>
+            </tr>
+            <tr>
+              <td>Avoid huge file reads early</td>
+              <td>Large file contents are the first thing compacted. Read files close to when you need them, not speculatively at session start.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="system-prompt">The System Prompt: What Claude Starts With</h2>
+
+      <p>The system prompt is assembled fresh for every API call by <code>context.ts</code> and injected parts from multiple sources. Understanding its structure lets you predict what "defaults" Claude operates under and where you can inject your own instructions.</p>
+
+      <div class="diagram-box">
+<span class="d-coral">System Prompt Structure (assembled in context.ts)</span>
+<span class="d-muted">│</span>
+<span class="d-muted">├──</span> <span class="d-yellow">[Base instructions]</span>      <span class="d-muted"># Hardcoded in main.tsx / query.ts</span>
+<span class="d-muted">│      </span>  Role definition, general behavior guidelines
+<span class="d-muted">│</span>
+<span class="d-muted">├──</span> <span class="d-yellow">[Tool usage guidelines]</span>  <span class="d-muted"># From tool.description + system prompt injections</span>
+<span class="d-muted">│      </span>  When/how to use each tool, ordering hints
+<span class="d-muted">│</span>
+<span class="d-muted">├──</span> <span class="d-yellow">[Git context]</span>            <span class="d-muted"># From services/git.ts (if in a git repo)</span>
+<span class="d-muted">│      </span>  Current branch, recent commits, git status
+<span class="d-muted">│</span>
+<span class="d-muted">├──</span> <span class="d-yellow">[Date &amp; environment]</span>     <span class="d-muted"># Injected at call time</span>
+<span class="d-muted">│      </span>  Current date/time, OS, working directory
+<span class="d-muted">│</span>
+<span class="d-muted">├──</span> <span class="d-green">[CLAUDE.md contents]</span>     <span class="d-muted"># &lt;-- YOUR INJECTION POINT</span>
+<span class="d-muted">│      </span>  Loaded from disk, formatted under # Memory heading
+<span class="d-muted">│</span>
+<span class="d-muted">└──</span> <span class="d-yellow">[Coordinator context]</span>    <span class="d-muted"># Only in multi-agent mode</span>
+<span class="d-muted">       </span>  Scratchpad paths, worker tool restrictions</div>
+
+      <p>Notice that CLAUDE.md is the only component in this list that <em>you</em> can control. Everything else is generated by the runtime. This reinforces CLAUDE.md as the primary lever for persistent behavioral modification.</p>
+
+      <!-- ================================================================ -->
+      <h2 id="slash-commands">Slash Commands vs Prompting: Know the Difference</h2>
+
+      <p>There are two fundamentally different ways to direct Claude Code: slash commands and natural language prompts. They operate at different levels of the stack and have different strengths.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Slash Commands (<code>/commit</code>, <code>/review</code>, etc.)</th>
+              <th>Natural Language Prompts</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Where processed</strong></td>
+              <td><code>commands.ts</code> → <code>commands/[name].ts</code>, before the API call</td>
+              <td>Inside the query loop, via API + tool dispatch</td>
+            </tr>
+            <tr>
+              <td><strong>Reliability</strong></td>
+              <td>Deterministic — same code path every time</td>
+              <td>Probabilistic — Claude interprets your intent</td>
+            </tr>
+            <tr>
+              <td><strong>Speed</strong></td>
+              <td>Often faster — can skip API calls for simple ops</td>
+              <td>Always hits the API at least once</td>
+            </tr>
+            <tr>
+              <td><strong>Best for</strong></td>
+              <td>Repeated, well-defined workflows</td>
+              <td>Novel, exploratory, context-sensitive tasks</td>
+            </tr>
+            <tr>
+              <td><strong>Customizable</strong></td>
+              <td>Yes — skills let you add your own</td>
+              <td>Via CLAUDE.md + prompt engineering</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The 80+ built-in slash commands live in <code>commands/</code>. Key ones to know:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Command</th><th>What it does (from source)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/commit</code></td><td>Runs <code>git diff</code>, analyzes changes, generates a conventional commit message, shows preview, lets you confirm. Includes co-author attribution by default.</td></tr>
+            <tr><td><code>/review</code></td><td>Performs a structured code review of staged or specified changes: correctness, security, performance, style.</td></tr>
+            <tr><td><code>/compact</code></td><td>Manually triggers context compaction with a user-readable summary of what was removed.</td></tr>
+            <tr><td><code>/memory</code></td><td>Opens the CLAUDE.md file for your current project in an editor — the fastest way to add persistent context.</td></tr>
+            <tr><td><code>/mcp</code></td><td>Manage MCP server connections: list, add, remove, auth.</td></tr>
+            <tr><td><code>/session</code></td><td>Session management: list recent sessions, resume a previous one, view transcripts.</td></tr>
+            <tr><td><code>/new</code></td><td>Starts a fresh session — clears message history but preserves CLAUDE.md context.</td></tr>
+            <tr><td><code>/autofix-pr</code></td><td>Fetches a PR's CI failures and automatically applies fixes. A power-user command that chains multiple tools.</td></tr>
+            <tr><td><code>/bughunter</code></td><td>Initiates a structured bug-finding workflow over a specified codebase area.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="bundled-skills">Bundled Skills: Ready-Made Power Commands</h2>
+
+      <p>The <code>skills/bundled/</code> directory contains 19 pre-packaged slash commands that ship with Claude Code. They're implemented as JavaScript files that get dynamically loaded as <code>SkillTool</code> instances. Think of them as first-class features that happen to be implemented in user-land.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Skill</th><th>What it does and when to use it</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/simplify</code></td><td>Reviews recently changed code and suggests refactoring for clarity. Run after you've gotten something working to clean it up.</td></tr>
+            <tr><td><code>/loop</code></td><td>Runs a prompt or command on a recurring basis within a session. Useful for "keep watching this file and tell me when X changes".</td></tr>
+            <tr><td><code>/schedule</code></td><td>Creates a cron-like scheduled agent trigger. The agent will run at the specified interval, independent of your active session.</td></tr>
+            <tr><td><code>/update-config</code></td><td>Modifies <code>settings.json</code> with proper hook support — safer than editing the file directly.</td></tr>
+            <tr><td><code>/claude-api</code></td><td>Scaffolds a new project that uses the Anthropic SDK. A guided setup flow for building Claude-powered apps.</td></tr>
+            <tr><td><code>/review-pr</code></td><td>AI-powered PR review: fetches the diff, analyzes it for bugs, security issues, and style, and posts a structured review.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="deferred-tools-trick">The Deferred Tools Trick: Hidden Capabilities</h2>
+
+      <p>Several powerful tools are hidden from Claude's initial context to save tokens. They're only available after Claude calls <code>ToolSearchTool</code> with the right keyword. This means there are capabilities you might not know exist — until you ask for them the right way.</p>
+
+      <p>To trigger a deferred tool, describe what you want in a way that matches the tool's <code>searchHint</code>. The tool search runs fuzzy matching against these hints. Known deferred tools and their hints:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>Search hint phrase</th><th>How to trigger it</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ScheduleCronTool</code></td>
+              <td>"create recurring cron scheduled agent task"</td>
+              <td>Ask Claude to "set up a recurring task" or "schedule this to run every day at 9am"</td>
+            </tr>
+            <tr>
+              <td><code>BriefTool</code></td>
+              <td>"summarize session for handoff"</td>
+              <td>Ask Claude to "create a brief" or "summarize this session for another agent"</td>
+            </tr>
+            <tr>
+              <td><code>NotebookEditTool</code></td>
+              <td>"jupyter notebook cell edit"</td>
+              <td>Ask Claude to "edit my notebook" or reference a <code>.ipynb</code> file</td>
+            </tr>
+            <tr>
+              <td><code>LSPTool</code></td>
+              <td>"language server diagnostics hover definition"</td>
+              <td>Ask for "go to definition" or "show me where this is defined"</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="behavior-cheatsheet">Behavior Cheat Sheet: Observable → Source → Lever</h2>
+
+      <p>A quick-reference map from things you observe to where they live in the source and what you can change.</p>
+
+      <div class="behavior-map">
+        <div class="behavior-map-header">
+          <span>What you observe</span>
+          <span>Source location</span>
+          <span>How to influence it</span>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude asks for permission before every file edit</div>
+          <div class="col-source">hooks/useCanUseTool.tsx<br>utils/permissions/</div>
+          <div class="col-lever">Use <code>--auto</code> flag or add path to auto-approve list in settings</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude "forgets" a file you showed it earlier</div>
+          <div class="col-source">services/compact/autoCompact.ts</div>
+          <div class="col-lever">Put critical context in CLAUDE.md; it's injection-immune to compaction</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude uses bash when you wanted a file read</div>
+          <div class="col-source">tools/BashTool/BashTool.ts → description<br>tools.ts → tool ordering</div>
+          <div class="col-lever">Explicitly say "read the file" not "show me what's in" — matches FileReadTool's description language</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude keeps suggesting the same approach you've rejected</div>
+          <div class="col-source">context.ts → getUserContext()</div>
+          <div class="col-lever">Add the anti-pattern to CLAUDE.md: "Never suggest X. Use Y instead."</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude spawns sub-agents you didn't expect</div>
+          <div class="col-source">tools/AgentTool/AgentTool.ts → description</div>
+          <div class="col-lever">Add to CLAUDE.md: "Do not use AgentTool unless I explicitly ask to parallelize." Or avoid phrasing that mentions "parallel" or "independently".</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude enters plan mode unexpectedly</div>
+          <div class="col-source">tools/EnterPlanModeTool/EnterPlanModeTool.ts</div>
+          <div class="col-lever">The tool description says Claude should enter plan mode for "risky operations." To skip it: add "proceed without a plan unless I ask for one" to CLAUDE.md.</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude uses a different coding style than you want</div>
+          <div class="col-source">Context assembly — no style rules exist by default</div>
+          <div class="col-lever">Add a complete style guide to CLAUDE.md. It will be injected as authoritative context on every turn.</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude writes tests in the wrong framework</div>
+          <div class="col-source">No default test framework preference in source</div>
+          <div class="col-lever">Add to CLAUDE.md: "Test framework: Vitest. Never use Jest." Claude reads this as authoritative.</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude stopped using a tool that used to work</div>
+          <div class="col-source">tools.ts → feature() flags + buildTool()</div>
+          <div class="col-lever">Check if the tool has a feature flag that may have changed. Also verify the tool is in the <code>getAllBaseTools()</code> return list and not deferred.</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude runs many tools in parallel, causing conflicts</div>
+          <div class="col-source">services/tools/toolOrchestration.ts</div>
+          <div class="col-lever">Tools with <code>isConcurrencySafe: false</code> (the default) run serially. If a custom tool is running in parallel unexpectedly, it was explicitly marked safe. Check the tool definition.</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">Claude's git commit messages don't match your convention</div>
+          <div class="col-source">commands/commit/ or skills/bundled/commit.js</div>
+          <div class="col-lever">Add your commit convention to CLAUDE.md, or fork the bundled commit skill and override it with your own <code>/commit</code> skill script.</div>
+        </div>
+
+        <div class="behavior-map-row">
+          <div class="col-observe">An MCP tool is available but Claude never uses it</div>
+          <div class="col-source">services/mcp/client.ts → tool discovery</div>
+          <div class="col-lever">The MCP tool description may not match your request language. Add an explicit mention of the MCP tool's name in your prompt, or add its use-case to CLAUDE.md.</div>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="reading-tool-source">How to Read Any Tool's Source File</h2>
+
+      <p>When you browse the source repository and want to understand a specific tool, here's the standard reading order for any <code>tools/[ToolName]/[ToolName].ts</code> file:</p>
+
+      <ol>
+        <li><strong>Read the <code>description</code> string first.</strong> This is the behavioral contract — what Claude understands about this tool's purpose. If you want to predict when Claude will use it, this is your answer.</li>
+        <li><strong>Check <code>isReadOnly</code> and <code>isConcurrencySafe</code>.</strong> These determine whether the tool auto-approves and whether multiple instances run in parallel. Two lines that tell you everything about the tool's safety profile.</li>
+        <li><strong>Read <code>checkPermissions()</code> if it exists.</strong> Any custom permission logic is here. For BashTool, this is where the command classifier runs.</li>
+        <li><strong>Skim the <code>call()</code> method.</strong> The actual execution logic. You don't need to understand every line — focus on what input it reads and what output it returns. The shape of the output determines what Claude sees as the tool's "result."</li>
+        <li><strong>Check <code>renderToolUseMessage()</code> and <code>renderToolResultMessage()</code>.</strong> These are the terminal UI renderers. They don't affect Claude's reasoning but tell you what the user sees in the REPL.</li>
+        <li><strong>Look for a <code>shouldDefer</code> property.</strong> If present and true, this tool is hidden from Claude's initial context and only available via ToolSearch. You'll need to use the right search phrase to access it.</li>
+      </ol>
+
+      <!-- ================================================================ -->
+      <h2 id="quick-reference">Quick Reference: File → What it Controls</h2>
+
+      <div class="cheatsheet">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File / Directory</th>
+                <th>Tag</th>
+                <th>What it controls</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>context.ts</code></td>
+                <td><span class="tag-pill system-prompt">System Prompt</span></td>
+                <td>How the system prompt is assembled each turn. Edit this to understand what base instructions Claude receives.</td>
+              </tr>
+              <tr>
+                <td><code>tools.ts</code></td>
+                <td><span class="tag-pill tool">Tool</span></td>
+                <td>Master list of all tools in priority order. Order affects Claude's tool selection probability.</td>
+              </tr>
+              <tr>
+                <td><code>tools/[X]/[X].ts</code></td>
+                <td><span class="tag-pill tool">Tool</span></td>
+                <td>Individual tool description (Claude's vocabulary), permission flags, execution logic.</td>
+              </tr>
+              <tr>
+                <td><code>CLAUDE.md</code> (yours)</td>
+                <td><span class="tag-pill memory">Memory</span></td>
+                <td>Persistent context injection. Your primary lever for all persistent behavioral changes.</td>
+              </tr>
+              <tr>
+                <td><code>memdir/</code></td>
+                <td><span class="tag-pill memory">Memory</span></td>
+                <td>How CLAUDE.md files are discovered and loaded. Edit to understand the search path.</td>
+              </tr>
+              <tr>
+                <td><code>hooks/useCanUseTool.tsx</code></td>
+                <td><span class="tag-pill permission">Permission</span></td>
+                <td>The main permission gate. Reads permissionMode from AppState to decide whether to show a dialog.</td>
+              </tr>
+              <tr>
+                <td><code>utils/permissions/</code></td>
+                <td><span class="tag-pill permission">Permission</span></td>
+                <td>Bash command allow-list, path-based rules, destructive op detection.</td>
+              </tr>
+              <tr>
+                <td><code>services/compact/</code></td>
+                <td><span class="tag-pill system-prompt">System Prompt</span></td>
+                <td>Compaction strategies. Controls what gets removed from history and in what order.</td>
+              </tr>
+              <tr>
+                <td><code>commands/</code></td>
+                <td><span class="tag-pill tool">Tool</span></td>
+                <td>All 80+ slash command implementations. Deterministic code paths that bypass the query loop.</td>
+              </tr>
+              <tr>
+                <td><code>skills/bundled/</code></td>
+                <td><span class="tag-pill tool">Tool</span></td>
+                <td>19 bundled skill scripts. Can be overridden with your own versions in <code>~/.claude/skills/</code>.</td>
+              </tr>
+              <tr>
+                <td><code>tools.ts → feature()</code> calls</td>
+                <td><span class="tag-pill feature-flag">Feature Flag</span></td>
+                <td>Compile-time feature gating. Determines which tools even exist in a given build.</td>
+              </tr>
+              <tr>
+                <td><code>services/mcp/client.ts</code></td>
+                <td><span class="tag-pill tool">Tool</span></td>
+                <td>MCP tool discovery and schema generation. Determines how external MCP tools are presented to Claude.</td>
+              </tr>
+              <tr>
+                <td><code>query.ts</code></td>
+                <td><span class="tag-pill system-prompt">System Prompt</span></td>
+                <td>The core agentic loop. Shows exactly how tool calls are dispatched and results returned.</td>
+              </tr>
+              <tr>
+                <td><code>QueryEngine.ts</code></td>
+                <td><span class="tag-pill system-prompt">System Prompt</span></td>
+                <td>API call orchestration, token budget management, compaction trigger points.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <section class="faq-section" id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details class="faq-item">
+          <summary>What is the quickest way to traverse the codebase?</summary>
+          <div class="faq-content">Start at <code>main.tsx</code> for the entry sequence, and then jump to <code>query.ts</code> to see the core agentic loop execution.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I track down a specific CLI command?</summary>
+          <div class="faq-content">All commands are registered into the CLI parsing utility inside <code>main.tsx</code> and cleanly map to specific execution modules in the <code>commands/</code> directory.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Where is the UI defined?</summary>
+          <div class="faq-content">The terminal interface is fully defined using standard React components found within the <code>ink/</code> and <code>components/</code> directory abstractions.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I test the internal code?</summary>
+          <div class="faq-content">Without the full build environment or Anthropic backend, it is difficult to compile, but you can read through the pure TypeScript logic functionally without issue.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Is the repository documentation up to date?</summary>
+          <div class="faq-content">This leaked code documentation acts as a snapshot analysis of the architecture and might not perfectly align with future official Claude Code iterations.</div>
+        </details>
+      </section>
+
+    </main>
+
+    <nav class="toc" aria-label="On this page">
+      <div class="toc-title">On This Page</div>
+      <ul class="toc-list" id="toc-list"></ul>
+    </nav>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  });
+</script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

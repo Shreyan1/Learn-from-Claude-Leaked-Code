@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCP &amp; Skills | Learn from Claude Leaked Code</title>
+  <meta name="description" content="How Model Context Protocol integrates with Claude Code, how the skills system works, bundled skills list, and writing your own skill." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">CC</div>
+      <span class="logo-text">Learn from Claude <span>Leaked Code</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+      <button class="btn-icon hamburger" id="hamburger" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle dark mode">
+        <span id="theme-icon">
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" style="display:none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span class="nav-icon"><i data-lucide="book-open"></i></span> Introduction</a>
+        <a href="architecture.html"><span class="nav-icon"><i data-lucide="layers"></i></span> Architecture</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Systems</div>
+      <nav class="sidebar-nav">
+        <a href="query-engine.html"><span class="nav-icon"><i data-lucide="zap"></i></span> Query Engine</a>
+        <a href="tools.html"><span class="nav-icon"><i data-lucide="wrench"></i></span> Tools System</a>
+        <a href="security.html"><span class="nav-icon"><i data-lucide="shield"></i></span> Security &amp; Permissions</a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Advanced</div>
+      <nav class="sidebar-nav">
+        <a href="best-practices.html"><span class="nav-icon"><i data-lucide="star"></i></span> Best Practices</a>
+        <a href="mcp-skills.html" class="active"><span class="nav-icon"><i data-lucide="plug"></i></span> MCP &amp; Skills</a>
+        <a href="interpret.html"><span class="nav-icon"><i data-lucide="compass"></i></span> Navigate the Source</a>
+      </nav>
+    </div>
+    <div class="sidebar-download">
+      <a href="https://github.com/Shreyan1/claude-code-src-leaked" target="_blank" rel="noopener" class="download-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.66-.17.61-.19 1.25-.05 1.87L9 22"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        View Full Leaked Code
+      </a>
+      <p class="download-note">On GitHub &middot; Shreyan1/claude-code-src-leaked</p>
+      <a href="https://www.linkedin.com/in/shreyanbasuray/" target="_blank" rel="noopener" class="linkedin-follow-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Follow on LinkedIn
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="content-wrapper">
+    <main class="page-content">
+
+      <div class="breadcrumb">
+        <a href="index.html">Learn from Claude Leaked Code</a>
+        <span class="sep">/</span>
+        <span>MCP &amp; Skills</span>
+      </div>
+
+      <span class="section-tag">Extensions</span>
+      <h1>MCP &amp; Skills</h1>
+      <p class="page-intro">Claude Code uses two complementary extension mechanisms: the <strong>Model Context Protocol (MCP)</strong> for connecting external tool servers and data sources, and the <strong>Skills system</strong> for reusable, composable slash command scripts.</p>
+
+      <h2 id="what-is-mcp">What is MCP?</h2>
+
+      <p>The <a href="https://modelcontextprotocol.io" target="_blank">Model Context Protocol</a> is an open standard for connecting AI models to external tools and data sources. It defines a client-server architecture where:</p>
+
+      <ul>
+        <li><strong>MCP Servers</strong> expose tools, resources, and prompts over a standardized protocol (JSON-RPC over stdio, SSE, or WebSocket).</li>
+        <li><strong>MCP Clients</strong> (Claude Code) discover and invoke these capabilities on behalf of the model.</li>
+        <li>Tools, resources, and prompts are all first-class protocol concepts, enabling rich integrations without custom code in the client.</li>
+      </ul>
+
+      <p>From Claude Code's perspective, an MCP tool is treated identically to a built-in tool at runtime, it goes through the same permission system, progress reporting, and rendering pipeline. The difference is that its <code>call()</code> implementation delegates to the MCP server via JSON-RPC.</p>
+
+      <h2 id="mcp-integration">How MCP Integrates</h2>
+
+      <p>The MCP integration lives in <code>services/mcp/</code>. The key files are:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>File</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>client.ts</code></td><td>MCP SDK client wrapper; manages connection lifecycle</td></tr>
+            <tr><td><code>MCPConnectionManager.tsx</code></td><td>React component managing connection state across all configured servers</td></tr>
+            <tr><td><code>types.ts</code></td><td>TypeScript types: <code>MCPServerConnection</code>, <code>ServerResource</code>, config types</td></tr>
+            <tr><td><code>config.ts</code></td><td>Load and merge MCP server configs from settings files</td></tr>
+            <tr><td><code>auth.ts</code></td><td>OAuth flow for MCP servers that require authentication</td></tr>
+            <tr><td><code>channelAllowlist.ts</code></td><td>Security: origin allowlist for bridge connections</td></tr>
+            <tr><td><code>channelPermissions.ts</code></td><td>Per-channel permission rules for bridge-connected servers</td></tr>
+            <tr><td><code>normalization.ts</code></td><td>Normalize MCP tool names and schemas to internal format</td></tr>
+            <tr><td><code>officialRegistry.ts</code></td><td>Prefetch official MCP server registry from Anthropic</td></tr>
+            <tr><td><code>InProcessTransport.ts</code></td><td>For MCP servers that run in-process (no subprocess)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="connection-lifecycle">Connection Lifecycle</h3>
+
+      <div class="mindmap-wrap">
+  <svg style="max-width: 640px;" viewBox="0 0 640 390" xmlns="http://www.w3.org/2000/svg" class="mindmap-svg" role="img" aria-label="MCP server connection lifecycle">
+    <defs>
+      <marker id="ahm" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d97757"/></marker>
+    </defs>
+
+    <!-- Phase 1: Config loading -->
+    <rect x="60" y="14" width="520" height="60" rx="9" fill="#1e1e35" stroke="#d97757" stroke-width="1.8"/>
+    <rect x="60" y="14" width="8" height="60" rx="4" fill="#d97757"/>
+    <text x="90" y="38" fill="#d97757" font-family="Inter,sans-serif" font-size="11" font-weight="700" letter-spacing="0.08em">1 · CONFIG LOADING</text>
+    <text x="90" y="57" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11">Read ~/.claude/settings.json + project .claude/settings.json · merge mcpServers config</text>
+
+    <line x1="320" y1="74" x2="320" y2="90" stroke="#d97757" stroke-width="1.5" marker-end="url(#ahm)"/>
+
+    <!-- Phase 2: Server launch -->
+    <rect x="60" y="93" width="520" height="80" rx="9" fill="#1a1040" stroke="#8b5cf6" stroke-width="1.6"/>
+    <rect x="60" y="93" width="8" height="80" rx="4" fill="#8b5cf6"/>
+    <text x="90" y="117" fill="#a78bfa" font-family="Inter,sans-serif" font-size="11" font-weight="700" letter-spacing="0.08em">2 · SERVER LAUNCH</text>
+    <text x="90" y="135" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11">For each configured server:</text>
+    <text x="110" y="152" fill="#6b7280" font-family="JetBrains Mono,monospace" font-size="10.5">stdio:  spawn subprocess with command + args</text>
+    <text x="110" y="165" fill="#6b7280" font-family="JetBrains Mono,monospace" font-size="10.5">sse:    connect to HTTP endpoint</text>
+
+    <line x1="320" y1="173" x2="320" y2="189" stroke="#d97757" stroke-width="1.5" marker-end="url(#ahm)"/>
+
+    <!-- Phase 3: Capability discovery -->
+    <rect x="60" y="192" width="520" height="80" rx="9" fill="#0e2620" stroke="#10b981" stroke-width="1.6"/>
+    <rect x="60" y="192" width="8" height="80" rx="4" fill="#10b981"/>
+    <text x="90" y="216" fill="#6ee7b7" font-family="Inter,sans-serif" font-size="11" font-weight="700" letter-spacing="0.08em">3 · CAPABILITY DISCOVERY</text>
+    <text x="90" y="234" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11">MCP initialize handshake</text>
+    <text x="110" y="251" fill="#6b7280" font-family="JetBrains Mono,monospace" font-size="10.5">tools/list → collect tool schemas</text>
+    <text x="110" y="264" fill="#6b7280" font-family="JetBrains Mono,monospace" font-size="10.5">resources/list · prompts/list</text>
+
+    <line x1="320" y1="272" x2="320" y2="288" stroke="#d97757" stroke-width="1.5" marker-end="url(#ahm)"/>
+
+    <!-- Phase 4: Tool registration -->
+    <rect x="60" y="291" width="520" height="70" rx="9" fill="#1a150e" stroke="#f59e0b" stroke-width="1.6"/>
+    <rect x="60" y="291" width="8" height="70" rx="4" fill="#f59e0b"/>
+    <text x="90" y="315" fill="#fde68a" font-family="Inter,sans-serif" font-size="11" font-weight="700" letter-spacing="0.08em">4 · TOOL REGISTRATION</text>
+    <text x="90" y="333" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11">Create MCPTool wrappers: name = "mcp__serverName__toolName"</text>
+    <text x="90" y="351" fill="#6b7280" font-family="Inter,sans-serif" font-size="11">call() → JSON-RPC tools/call · inputJSONSchema from server</text>
+
+    <line x1="320" y1="361" x2="320" y2="374" stroke="#d97757" stroke-width="1.5" marker-end="url(#ahm)"/>
+
+    <!-- Phase 5: Exposed to Claude -->
+    <rect x="60" y="377" width="520" height="24" rx="8" fill="#1e1e35" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="320" y="393" fill="#93c5fd" font-family="Inter,sans-serif" font-size="11" font-weight="700" text-anchor="middle">5 · MCP tools included in next API request&apos;s tools array → exposed to Claude</text>
+  </svg>
+</div>
+
+      <h2 id="mcp-config">MCP Server Configuration</h2>
+
+      <p>MCP servers are configured in <code>~/.claude/settings.json</code> (global) or <code>.claude/settings.json</code> (project-scoped):</p>
+
+      <pre><code class="language-json">// ~/.claude/settings.json - MCP server configuration
+{
+  "mcpServers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/projects"],
+      "env": {}
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "my-custom-api": {
+      "type": "sse",
+      "url": "https://my-company.internal/mcp",
+      "headers": {
+        "Authorization": "Bearer ${MY_API_TOKEN}"
+      }
+    }
+  }
+}</code></pre>
+
+      <div class="callout callout-info">
+        <span class="callout-icon"><i data-lucide="info"></i></span>
+        <div class="callout-body">
+          <p>Environment variable interpolation (<code>${VAR_NAME}</code>) is supported in MCP server configs via <code>envExpansion.ts</code>. This allows storing credentials in environment variables rather than hardcoding them in settings files, which is important if your settings are committed to version control.</p>
+        </div>
+      </div>
+
+      <h2 id="mcp-resources">MCP Resources</h2>
+
+      <p>MCP servers can expose <em>resources</em> in addition to tools. Resources are read-only data sources (files, database records, API responses) that Claude can access via the <code>ListMcpResourcesTool</code> and <code>ReadMcpResourceTool</code> built-in tools:</p>
+
+      <pre><code class="language-typescript">// How Claude accesses MCP resources:
+// 1. Discover available resources
+// (uses ListMcpResourcesTool)
+// → { uri: "file:///home/user/data.csv", name: "Sales Data", mimeType: "text/csv" }
+
+// 2. Read a specific resource by URI
+// (uses ReadMcpResourceTool)
+// → Contents of the resource as text or base64-encoded binary
+
+// resources are different from tools - they are accessed directly
+// by URI without calling any server-side logic beyond the fetch itself</code></pre>
+
+      <h2 id="mcp-auth">MCP Authentication</h2>
+
+      <p>MCP servers that require authentication (e.g., a company's internal API) can implement the OAuth 2.0 flow via the MCP protocol's elicitation mechanism. When Claude Code encounters a tool call that returns error code <code>-32042</code> (authentication required), it launches the OAuth flow:</p>
+
+      <ol>
+        <li>The MCP server returns <code>-32042</code> with an authorization URL.</li>
+        <li>Claude Code opens the URL in the user's browser.</li>
+        <li>After OAuth completion, the token is stored in the keychain.</li>
+        <li>Future calls include the token in the MCP connection headers.</li>
+      </ol>
+
+      <p>The <code>McpAuthTool</code> and <code>elicitationHandler.ts</code> implement this flow. In print/SDK mode, elicitations are surfaced as structured events rather than UI dialogs.</p>
+
+      <h2 id="skills-system">The Skills System</h2>
+
+      <p>Skills are the scripting layer of Claude Code. A skill is a markdown file (with optional YAML frontmatter) that defines a reusable slash command. Skills live in <code>~/.claude/skills/</code> (global), <code>.claude/skills/</code> (project), or are bundled with the tool itself (<code>src/skills/bundled/</code>).</p>
+
+      <p>When a user types <code>/commit</code>, the skill system:</p>
+      <ol>
+        <li>Looks up the skill file matching "commit".</li>
+        <li>Reads and parses the skill's markdown template.</li>
+        <li>Expands any template variables (<code>$ARGUMENTS</code>, <code>$CWD</code>, etc.).</li>
+        <li>Submits the expanded prompt as a user message to the query pipeline.</li>
+      </ol>
+
+      <h3 id="skill-file-format">Skill File Format</h3>
+
+      <pre><code class="language-markdown">---
+# skills/commit.md - skill frontmatter
+name: commit
+description: Create a git commit with a smart message
+aliases:
+  - c
+  - git-commit
+# Arguments this skill accepts (for autocomplete and help)
+arguments:
+  - name: message
+    description: Optional commit message override
+    required: false
+---
+
+Review the git diff and create a well-structured commit message.
+
+Focus on the "why" not the "what". Format as:
+
+&lt;type&gt;(&lt;scope&gt;): &lt;short description&gt;
+
+&lt;body if needed&gt;
+
+Then run: `git commit -m "..."` with the generated message.
+
+$ARGUMENTS</code></pre>
+
+      <h3 id="skill-variables">Template Variables</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Variable</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>$ARGUMENTS</code></td><td>Any text the user typed after the slash command name</td></tr>
+            <tr><td><code>$CWD</code></td><td>Current working directory path</td></tr>
+            <tr><td><code>$SELECTION</code></td><td>Currently selected text (in IDE integrations)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="bundled-skills">Bundled Skills</h2>
+
+      <p>Claude Code ships with a set of bundled skills in <code>src/skills/bundled/</code>. These are compiled into the binary and available without any configuration:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Skill</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>batch.ts</code></td><td>Run multiple tasks in parallel as separate subagent calls.</td></tr>
+            <tr><td><code>claudeApi.ts</code></td><td>Integration helpers for building apps with the Claude API.</td></tr>
+            <tr><td><code>commit.ts</code></td><td>Smart git commit with AI-generated commit message following conventional commits.</td></tr>
+            <tr><td><code>index.ts</code></td><td>Skill registry/index; lists all available skills.</td></tr>
+            <tr><td><code>keybindings.ts</code></td><td>Helper for customizing Claude Code keyboard bindings.</td></tr>
+            <tr><td><code>loop.ts</code></td><td>Run a prompt or skill on a recurring interval (polling pattern).</td></tr>
+            <tr><td><code>loremIpsum.ts</code></td><td>Generate placeholder text, useful for testing layouts.</td></tr>
+            <tr><td><code>remember.ts</code></td><td>Save facts or instructions to persistent memory.</td></tr>
+            <tr><td><code>scheduleRemoteAgents.ts</code></td><td>Create, list, and manage scheduled remote agent triggers.</td></tr>
+            <tr><td><code>simplify.ts</code></td><td>Review changed code for quality and refactoring opportunities.</td></tr>
+            <tr><td><code>skillify.ts</code></td><td>Convert a prompt or workflow into a reusable skill file.</td></tr>
+            <tr><td><code>stuck.ts</code></td><td>Get unstuck: analyze what's blocking progress and suggest approaches.</td></tr>
+            <tr><td><code>updateConfig.ts</code></td><td>Configure Claude Code settings via natural language description.</td></tr>
+            <tr><td><code>verify.ts</code></td><td>Verify a claim or implementation against tests and specifications.</td></tr>
+            <tr><td><code>verifyContent.ts</code></td><td>Verify that content (docs, comments) matches the actual code behavior.</td></tr>
+            <tr><td><code>claudeApiContent.ts</code></td><td>Generate content using the Claude API with streaming.</td></tr>
+            <tr><td><code>claudeInChrome.ts</code></td><td>Integration with Claude's Chrome extension.</td></tr>
+            <tr><td><code>debug.ts</code></td><td>Step through a debugging workflow systematically.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="writing-skills">Writing Your Own Skill</h2>
+
+      <p>Creating a custom skill is straightforward. Here is a complete example of a skill that performs a security review of changed files:</p>
+
+      <pre><code class="language-markdown">---
+name: security-check
+description: Review changed files for security vulnerabilities
+aliases:
+  - sec
+  - security
+arguments:
+  - name: files
+    description: Specific files to check (defaults to git diff)
+    required: false
+---
+
+Perform a security review of the following changes.
+
+Check for:
+1. **Injection vulnerabilities**, SQL injection, shell injection, XSS
+2. **Authentication issues**, missing auth checks, JWT misuse
+3. **Secrets in code**, API keys, passwords, tokens hardcoded
+4. **Dependency vulnerabilities**, outdated packages with CVEs
+5. **Input validation**, missing sanitization of user inputs
+6. **Path traversal**, unvalidated file paths
+7. **Cryptographic issues**, weak algorithms, improper key handling
+
+For each finding, rate severity (LOW/MEDIUM/HIGH/CRITICAL) and suggest a fix.
+
+$ARGUMENTS</code></pre>
+
+      <p>Save this as <code>~/.claude/skills/security-check.md</code> (global) or <code>.claude/skills/security-check.md</code> (project-only). It will be available as <code>/security-check</code> (or <code>/sec</code> via the alias) in any Claude Code session.</p>
+
+      <h3 id="skill-loaders">Skill Discovery and Loading</h3>
+
+      <p>Skills are loaded by <code>skills/loadSkillsDir.ts</code>, which scans skill directories and builds a registry. The <code>bundledSkills.ts</code> file exports the pre-compiled bundled skills. At runtime, the skill registry is merged from all sources: user global, project-local, and bundled.</p>
+
+      <p>When the <code>EXPERIMENTAL_SKILL_SEARCH</code> feature flag is enabled, <code>services/skillSearch/prefetch.js</code> runs at turn start to pre-index the skills directory for semantic search. This allows the model to discover and invoke skills based on intent rather than exact command names.</p>
+
+      <h2 id="mcp-skill-builders">MCP-Based Skills</h2>
+
+      <p>The <code>skills/mcpSkillBuilders.ts</code> file enables skills to be exposed as MCP tools. This means a skill defined in your <code>~/.claude/skills/</code> directory can be made available to any MCP client, not just Claude Code's own REPL. This is the bridge between the simple markdown-skill format and the full MCP ecosystem.</p>
+
+      <pre><code class="language-typescript">// skills/mcpSkillBuilders.ts - exposes skills as MCP tools
+export function buildMCPSkillTool(skill: SkillDefinition): MCPToolDefinition {
+  return {
+    name: skill.name,
+    description: skill.description,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        arguments: {
+          type: 'string',
+          description: 'Arguments to pass to the skill',
+        },
+      },
+    },
+    // When called, expands the skill template and submits it
+    handler: async ({ arguments: args }) =&gt; {
+      const expanded = expandSkillTemplate(skill.content, args)
+      return { content: expanded }
+    },
+  }
+}</code></pre>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon"><i data-lucide="lightbulb"></i></span>
+        <div class="callout-body">
+          <p>Skills are a lightweight alternative to full MCP server development for many use cases. If you need to give Claude Code a repeatable workflow (code review, deployment checklist, commit message format), a skill file is often the right tool. Only build a full MCP server when you need real-time data access, persistent state, or tools that non-Claude clients also need.</p>
+        </div>
+      </div>
+
+      <h2 id="mcp-vs-skills">MCP vs. Skills: When to Use Each</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Consideration</th>
+              <th>Use MCP Server</th>
+              <th>Use a Skill</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Real-time data access</td>
+              <td>✓ Database, APIs, live data</td>
+              <td>- Static templates only</td>
+            </tr>
+            <tr>
+              <td>Complex server logic</td>
+              <td>✓ Computation, transformations</td>
+              <td>- Delegates to Claude</td>
+            </tr>
+            <tr>
+              <td>Other AI clients</td>
+              <td>✓ Works with any MCP client</td>
+              <td>- Claude Code only</td>
+            </tr>
+            <tr>
+              <td>Setup complexity</td>
+              <td>High (Node.js server, deployment)</td>
+              <td>Low (single markdown file)</td>
+            </tr>
+            <tr>
+              <td>Reusable prompts</td>
+              <td>- Overkill</td>
+              <td>✓ Perfect fit</td>
+            </tr>
+            <tr>
+              <td>Team sharing</td>
+              <td>✓ Via server URL</td>
+              <td>✓ Via project .claude/skills/</td>
+            </tr>
+            <tr>
+              <td>Version control</td>
+              <td>✓ Server source code</td>
+              <td>✓ Markdown files in repo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <section class="faq-section" id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details class="faq-item">
+          <summary>What is MCP (Model Context Protocol)?</summary>
+          <div class="faq-content">MCP allows seamless connection to external data sources and custom local toolchains without hardcoding them into the main binary application.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How do skills differ from tools?</summary>
+          <div class="faq-content">Skills are typically declarative markdown or instruction sets that map to a sequence of actions, whereas tools are hardcoded, native TypeScript functionality.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I build my own MCP server?</summary>
+          <div class="faq-content">Yes! You can serve endpoints that the agent connects to natively for extending its capabilities and bridging it to internal tools or databases.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How are skills parsed?</summary>
+          <div class="faq-content">They are loaded from the file structure and interpreted as dynamic tool expansions, allowing Claude to read and execute the unique workflows described within.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Are skills shared globally?</summary>
+          <div class="faq-content">You can have workspace-specific skill directories and global tools, making it easy to specialize the agent for a specific project without muddying your global CLI setup.</div>
+        </details>
+      </section>
+
+    </main>
+
+    <nav class="toc" aria-label="On this page">
+      <div class="toc-title">On This Page</div>
+      <ul class="toc-list" id="toc-list"></ul>
+    </nav>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  });
+</script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
